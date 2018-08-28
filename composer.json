@@ -1,0 +1,38 @@
+{
+    "name": "antonyan/ddd-mappers-infrastructure",
+    "description": "DDD project infrastructure",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Artem Antonenko",
+            "email": "antonenko.artem@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.1.0",
+        "symfony/http-foundation": "^4.1",
+        "symfony/routing": "^4.1",
+        "symfony/http-kernel": "^4.1",
+        "symfony/event-dispatcher": "^4.1",
+        "symfony/dependency-injection": "^4.1",
+        "doctrine/migrations": "^1.8",
+        "doctrine/annotations": "^1.6",
+        "symfony/validator": "^4.1",
+        "vlucas/phpdotenv": "^2.5",
+        "doctrine/dbal": "^2.8"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "Infrastructure\\": "/"
+        },
+        "psr-0": {
+            "Infrastructure\\Annotations\\": "Annotations"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "6.*"
+    },
+    "minimum-stability": "stable"
+}

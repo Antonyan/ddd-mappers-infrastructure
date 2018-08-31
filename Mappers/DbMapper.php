@@ -5,6 +5,7 @@ namespace Infrastructure\Mappers;
 use Infrastructure\Exceptions\InfrastructureException;
 use Infrastructure\Exceptions\QueryBuilderEmptyInQueryException;
 use Infrastructure\Models\ArraySerializable;
+use Infrastructure\Models\Collection;
 use Infrastructure\Models\EntityToDataSourceTranslator;
 use Infrastructure\Models\PaginationCollection;
 use Infrastructure\Models\SearchCriteria\EqualCriteria;
@@ -97,6 +98,16 @@ abstract class DbMapper extends BaseMapper
 
         return $collection;
     }
+
+    /**
+     * @return Collection
+     * @throws InfrastructureException
+     */
+    public function loadAll(): Collection
+    {
+        return $this->buildCollection($this->mySqlClient->fetchAll($this->getSelectQuery(), []));
+    }
+
 
     /**
      * @param array $objectData

@@ -8,6 +8,7 @@ use Doctrine\DBAL\Driver\Statement;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception\InvalidArgumentException;
 use Infrastructure\Exceptions\InfrastructureException;
+use Infrastructure\Models\Db\BatchSave;
 
 class MySQLClient
 {
@@ -39,6 +40,17 @@ class MySQLClient
     public function fetchAll(string $query, array $params) : array
     {
         return $this->executeSqlStatement($query, $params)->fetchAll();
+    }
+
+    /**
+     * @param string $query
+     * @param array $params
+     * @return Statement
+     * @throws InfrastructureException
+     */
+    public function execute(string $query, array $params) : Statement
+    {
+        return $this->executeSqlStatement($query, $params);
     }
 
     /**
@@ -114,6 +126,22 @@ class MySQLClient
         }
 
         return $this->connection;
+    }
+
+    /**
+     * @param $table
+     * @param $parametersList
+     * @throws InfrastructureException
+     */
+    public function batchSave($table, $parametersList) : void
+    {
+        $batchInsert = new BatchSave($table, $parametersList);
+        $this->executeSqlStatement($batchInsert->query(), $batchInsert->params());
+    }
+
+    public function batchDelete($table, $identifier, $identifierValues) : void
+    {
+
     }
 
     /**

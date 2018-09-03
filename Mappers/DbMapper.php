@@ -5,6 +5,7 @@ namespace Infrastructure\Mappers;
 use Infrastructure\Exceptions\InfrastructureException;
 use Infrastructure\Exceptions\QueryBuilderEmptyInQueryException;
 use Infrastructure\Models\ArraySerializable;
+use Infrastructure\Models\Collection;
 use Infrastructure\Models\EntityToDataSourceTranslator;
 use Infrastructure\Models\PaginationCollection;
 use Infrastructure\Models\SearchCriteria\EqualCriteria;
@@ -154,6 +155,25 @@ abstract class DbMapper extends BaseMapper
     }
 
     /**
+     * @param Collection $paramsList
+     * @throws InfrastructureException
+     */
+    protected function batchSave(Collection $paramsList) : void
+    {
+        $parametersForCreate = $paramsList->toArray()[Collection::ITEMS];
+        $parametersForInsert = [];
+
+        foreach ($parametersForCreate as $entityParams) {
+            $parametersForInsert[] = $this->entityToDataSourceTranslator->translatePropertyInColumn($entityParams);
+        }
+
+        $this->mySqlClient->batchSave(
+            $this->entityToDataSourceTranslator->table(),
+            $parametersForInsert
+        );
+    }
+
+    /**
      * @param array $data
      * @return ArraySerializable
      * @throws InfrastructureException
@@ -220,6 +240,25 @@ abstract class DbMapper extends BaseMapper
     {
         $this->mySqlClient->delete($this->entityToDataSourceTranslator->table(), [$byPropertyName => $propertyValue]);
         return true;
+    }
+
+    /**
+     * @param SearchCriteria $filter
+     * @throws InfrastructureException
+     */
+    public function batchDelete(SearchCriteria $filter) : void
+    {
+        /** @var SearchCriteriaQueryString $filter */
+        $queryBuilder = new FilterToQueryTranslator($this->entityToDataSourceTranslator->propertyToColumnMap());
+        try {
+            $whereQueryPart = $queryBuilder->generateWhere($filter);
+        } catch (QueryBuilderEmptyInQueryException $exception) {
+            return;
+        }
+
+        $query = 'DELETE FROM ' . $this->entityToDataSourceTranslator->table() . $whereQueryPart->getQuery();
+
+        $this->mySqlClient->execute($query, $whereQueryPart->getBindingValues());
     }
 
     /**

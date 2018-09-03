@@ -162,7 +162,7 @@ class FilterToQueryTranslator
      */
     public function generateWhereIn(SearchCriteria $filter) : DbQueryPart
     {
-        $filterConditions = $filter->getConditions();
+        $filterConditions = $filter->conditions();
         $bindPlaceholders = [];
         $whereInConditions = [];
         foreach ($filterConditions[DbMapper::IN_SIGN] as $field => $values) {

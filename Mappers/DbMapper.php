@@ -225,6 +225,14 @@ abstract class DbMapper extends BaseMapper
     /**
      * @return string
      */
+    protected function table(): string
+    {
+        return $this->entityToDataSourceTranslator->table();
+    }
+
+    /**
+     * @return string
+     */
     protected function getClassName() : string
     {
         return \get_class($this);

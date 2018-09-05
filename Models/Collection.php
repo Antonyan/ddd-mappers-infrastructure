@@ -16,8 +16,7 @@ class Collection implements \IteratorAggregate, \Countable, ArraySerializable
      */
     public function __construct(array $collection = [])
     {
-        $this->checkTypeCollection($collection);
-        $this->collection = $collection;
+        $this->populateCollection($collection);
     }
 
     /**
@@ -287,15 +286,11 @@ class Collection implements \IteratorAggregate, \Countable, ArraySerializable
 
     /**
      * @param array $collection
-     * @throws InfrastructureException
      */
-    private function checkTypeCollection(array $collection)
+    private function populateCollection(array $collection): void
     {
         foreach ($collection as $item) {
-            if ( !($item instanceof ArraySerializable) ) {
-                $type = is_object($item) ? get_class($item) : gettype($item);
-                throw new InfrastructureException(ArraySerializable::class  . " type expected, $type given");
-            }
+            $this->push($item);
         }
     }
 }

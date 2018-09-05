@@ -10,6 +10,16 @@ class Collection implements \IteratorAggregate, \Countable, ArraySerializable
     const ITEMS = 'items';
 
     /**
+     * Collection constructor.
+     * @param ArraySerializable[] $collection
+     * @throws InfrastructureException
+     */
+    public function __construct(array $collection = [])
+    {
+        $this->populateCollection($collection);
+    }
+
+    /**
      * @var ArraySerializable[]
      */
     private $collection = [];
@@ -272,5 +282,15 @@ class Collection implements \IteratorAggregate, \Countable, ArraySerializable
         $this->collection = array_values(array_filter($this->collection, $callable));
 
         return $this;
+    }
+
+    /**
+     * @param array $collection
+     */
+    private function populateCollection(array $collection): void
+    {
+        foreach ($collection as $item) {
+            $this->push($item);
+        }
     }
 }

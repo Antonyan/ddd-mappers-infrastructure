@@ -222,6 +222,14 @@ abstract class DbMapper extends BaseMapper
     }
 
     /**
+     * @return string
+     */
+    protected function currentTable() : string
+    {
+        return $this->entityToDataSourceTranslator->table();
+    }
+
+    /**
      * @return int
      * @throws InfrastructureException
      */

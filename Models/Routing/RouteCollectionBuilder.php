@@ -3,6 +3,7 @@
 namespace Infrastructure\Models\Routing;
 
 use Infrastructure\Exceptions\InfrastructureException;
+use Infrastructure\Models\CRUDServiceInterface;
 use Symfony\Component\Routing\RouteCollection;
 
 class RouteCollectionBuilder
@@ -28,6 +29,12 @@ class RouteCollectionBuilder
      */
     public function addCRUD(string $path, string $presentationService) : RouteCollectionBuilder
     {
+        if ( !($presentationService instanceof CRUDServiceInterface) ) {
+            throw new InfrastructureException(
+                'The presentation service must be implements ' . CRUDServiceInterface::class . ' interface'
+            );
+        }
+
         $this->addGET($path, $presentationService, 'load')
             ->addPOST($path, $presentationService, 'create')
             ->addPUT($path . '/{id}', $presentationService, 'update')

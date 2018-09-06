@@ -29,7 +29,7 @@ class RouteCollectionBuilder
      */
     public function addCRUD(string $path, string $presentationService) : RouteCollectionBuilder
     {
-        if ( !($presentationService instanceof CRUDServiceInterface) ) {
+        if (!is_subclass_of($presentationService, CRUDServiceInterface::class)) {
             throw new InfrastructureException(
                 'The presentation service must be implements ' . CRUDServiceInterface::class . ' interface'
             );

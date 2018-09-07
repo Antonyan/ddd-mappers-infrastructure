@@ -162,7 +162,10 @@ class MySQLClient
             $stmt->bindValue($paramName, $paramValue);
         }
 
-        $stmt->execute();
+        if (!$stmt->execute()) {
+            throw new InfrastructureException(print_r($stmt->errorInfo(), true));
+        }
+
         return $stmt;
     }
 

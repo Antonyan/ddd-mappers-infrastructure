@@ -12,7 +12,6 @@ class Collection implements \IteratorAggregate, \Countable, ArraySerializable
     /**
      * Collection constructor.
      * @param ArraySerializable[] $collection
-     * @throws InfrastructureException
      */
     public function __construct(array $collection = [])
     {

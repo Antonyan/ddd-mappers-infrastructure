@@ -68,14 +68,12 @@ abstract class BaseMapper
      * @param $offset
      * @return PaginationCollection
      */
-    protected function buildPaginationCollection(array $objectsParams, $totalCount, $limit, $offset) : PaginationCollection
+    final protected function buildPaginationCollection(array $objectsParams, $totalCount, $limit, $offset) : PaginationCollection
     {
-        $collection = new PaginationCollection($totalCount, $limit, $offset);
-        foreach ($objectsParams as $objectParams) {
-            $collection->push($this->buildObjectOptionalFields($objectParams));
-        }
+        $paginationCollection = new PaginationCollection($totalCount, $limit, $offset);
+        $paginationCollection->merge($this->buildCollection($objectsParams));
 
-        return $collection;
+        return $paginationCollection;
     }
 
     /**

@@ -19,7 +19,7 @@ class BatchSave
     /**
      * @var array
      */
-    private $parametersForBind;
+    private $parametersForBind = [];
 
     /**
      * @var string
@@ -34,7 +34,7 @@ class BatchSave
     /**
      * @var array
      */
-    private $fields;
+    private $fields = [];
 
     /**
      * BatchSave constructor.

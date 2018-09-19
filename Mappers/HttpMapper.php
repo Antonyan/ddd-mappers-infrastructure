@@ -122,7 +122,7 @@ abstract class HttpMapper extends BaseMapper
     public function delete(string $byPropertyName, $propertyValue): bool
     {
         $deleteUrl = $this->getUrlWithIdentifier($propertyValue, $this->deleteUrl());
-        return $this->sendHttpRequest('GET', $deleteUrl);
+        return $this->sendHttpRequest('DELETE', $deleteUrl);
     }
 
 
@@ -169,6 +169,10 @@ abstract class HttpMapper extends BaseMapper
 
         if ($response->getStatusCode() >= 400) {
             $this->throwException($response->getStatusCode());
+        }
+
+        if ($response->getBody()->eof())  {
+            return true;
         }
 
         $contentAsArray = $this->parse($response->getBody()->getContents(), array_shift($contentTypeHeader));

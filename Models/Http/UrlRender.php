@@ -3,10 +3,10 @@
 namespace Infrastructure\Models\Http;
 
 
-class UrlPlaceholderRender
+class UrlRender
 {
+    public const LOAD_URL = 'loadUrl';
     public const GET_URL = 'getUrl';
-    public const GET_ONE_URL = 'getOneUrl';
     public const CREATE_URL = 'createUrl';
     public const UPDATE_URL = 'updateUrl';
     public const DELETE_URL = 'deleteUrl';
@@ -27,47 +27,52 @@ class UrlPlaceholderRender
 
     /**
      * @param array $data
+     * @param array $params
      * @return string
      */
-    public function getUrl(array $data = []): string
+    public function prepareLoadUrl(array $data = [], array $params = []): string
     {
-        return $this->render(self::GET_URL, $data);
+        return $this->buildUrl($this->render(self::LOAD_URL, $data), $params);
     }
 
     /**
      * @param array $data
+     * @param array $params
      * @return string
      */
-    public function getOneUrl(array $data = []): string
+    public function prepareGetUrl(array $data = [], array $params = []): string
     {
-        return $this->render(self::GET_ONE_URL, $data);
+        return $this->buildUrl($this->render(self::GET_URL, $data), $params);
     }
 
     /**
      * @param array $data
+     * @param array $params
      * @return string
      */
-    public function createUrl(array $data = []): string
+    public function prepareCreateUrl(array $data = [], array $params = []): string
     {
-        return $this->render(self::CREATE_URL, $data);
+        return $this->buildUrl($this->render(self::CREATE_URL, $data), $params);
     }
 
     /**
      * @param array $data
+     * @param array $params
      * @return string
      */
-    public function updateUrl(array $data = []): string
+    public function prepareUpdateUrl(array $data = [], array $params = []): string
     {
-        return $this->render(self::UPDATE_URL, $data);
+        return $this->buildUrl($this->render(self::UPDATE_URL, $data), $params);
     }
 
     /**
      * @param array $data
+     * @param array $params
      * @return string
      */
-    public function deleteUrl(array $data = []): string
+    public function prepareDeleteUrl(array $data = [], array $params = []): string
     {
-        return $this->render(self::DELETE_URL, $data);
+        return $this->buildUrl($this->render(self::DELETE_URL, $data), $params);
     }
 
     /**
@@ -90,5 +95,20 @@ class UrlPlaceholderRender
     private function extractPlaceholders(array $data = []): array
     {
         return array_map(function ($propertyName) {return ':' . $propertyName;}, array_keys($data));
+    }
+
+    /**
+     * @param string $url
+     * @param array $params
+     * @return string
+     */
+    private function buildUrl(string $url, array $params = [])
+    {
+        if (!empty($params)) {
+            $separator = strpos($url, '?') === null ? '?' : '&';
+            $url = trim($url, '&') . $separator . http_build_query($params, '&');
+        }
+
+        return $url;
     }
 }

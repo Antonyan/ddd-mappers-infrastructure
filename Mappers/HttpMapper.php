@@ -1,23 +1,22 @@
 <?php
 namespace Infrastructure\Mappers;
 
-use Infrastructure\Exceptions\HttpResourceNotFoundException;
 use Infrastructure\Exceptions\InfrastructureException;
+use Infrastructure\Exceptions\InternalException;
 use Infrastructure\Exceptions\ValidationException;
 use Infrastructure\Models\ArraySerializable;
 use Infrastructure\Models\Collection;
 use Infrastructure\Models\Http\AbstractRequestFactory;
-use Infrastructure\Models\Http\HeadersBuilder;
+use Infrastructure\Models\Http\Headers;
 use Infrastructure\Models\Http\HttpClient;
-use Infrastructure\Models\Http\UrlPlaceholderRender;
+use Infrastructure\Models\Http\UrlRender;
 use Infrastructure\Models\PaginationCollection;
 use Infrastructure\Models\SearchCriteria\SearchCriteria;
+use Psr\Http\Message\RequestInterface;
 
 abstract class HttpMapper extends BaseMapper
 {
     public const LINKS_FIELD = 'links';
-
-    public const CONTENT_TYPE_JSON = 'application/json';
 
     public const AVAILABLE_URLS = 'availableUrls';
     public const DEFAULT_HEADERS = 'defaultHeaders';
@@ -29,19 +28,14 @@ abstract class HttpMapper extends BaseMapper
     protected const DELETE = 'DELETE';
 
     /**
-     * @var string
-     */
-    protected static $defaultContentType = self::CONTENT_TYPE_JSON;
-
-    /**
      * @var HttpClient
      */
     private $httpClient = null;
 
     /**
-     * @var HeadersBuilder
+     * @var Headers
      */
-    private $headersBuilder;
+    private $defaultHeaders;
 
     /**
      * @var AbstractRequestFactory
@@ -49,9 +43,9 @@ abstract class HttpMapper extends BaseMapper
     private $requestFactory;
 
     /**
-     * @var UrlPlaceholderRender
+     * @var UrlRender
      */
-    private $urlPlaceholderRender;
+    private $urlRender;
 
     /**
      * HttpMapper constructor.
@@ -65,22 +59,26 @@ abstract class HttpMapper extends BaseMapper
         $this->httpClient = $httpClient;
         $this->requestFactory = $requestFactory;
 
-        $this->headersBuilder = new HeadersBuilder($httpMapperConfig[self::DEFAULT_HEADERS] ?? []);
-        $this->urlPlaceholderRender = new UrlPlaceholderRender($httpMapperConfig[self::AVAILABLE_URLS]);
+        $this->defaultHeaders = new Headers($httpMapperConfig[self::DEFAULT_HEADERS] ?? []);
+        $this->urlRender = new UrlRender($httpMapperConfig[self::AVAILABLE_URLS]);
     }
 
     /**
      * @param SearchCriteria $filter
      * @return PaginationCollection
-     * @throws HttpResourceNotFoundException
      * @throws InfrastructureException
      * @throws ValidationException
      * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws InternalException
      */
     public function load(SearchCriteria $filter): PaginationCollection
     {
         $params = $this->prepareParams($filter);
-        $result = $this->sendHttpRequest(self::GET, $this->urlPlaceholderRender->getUrl(), $params);
+
+        $result = $this->getCollection($this->requestFactory->create(
+            self::GET,
+            $this->urlRender->prepareLoadUrl([], $params)
+        ));
 
         $paginationCollection = new PaginationCollection(count($result), $filter->limit(), $filter->offset());
         $paginationCollection->merge($result);
@@ -91,54 +89,59 @@ abstract class HttpMapper extends BaseMapper
     /**
      * @param array $identifiers
      * @return ArraySerializable
-     * @throws HttpResourceNotFoundException
      * @throws InfrastructureException
-     * @throws ValidationException
      * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws InternalException
      */
     public function get(array $identifiers) : ArraySerializable
     {
-        return $this->sendHttpRequest(self::GET, $this->urlPlaceholderRender->getOneUrl($identifiers));
+        return $this->getModel(
+            $this->requestFactory->create(self::GET, $this->urlRender->prepareGetUrl($identifiers))
+        );
     }
 
     /**
      * @param array $objectData
      * @return ArraySerializable
-     * @throws HttpResourceNotFoundException
      * @throws InfrastructureException
      * @throws ValidationException
      * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws InternalException
      */
     public function create(array $objectData): ArraySerializable
     {
-        return $this->sendHttpRequest(self::POST, $this->urlPlaceholderRender->createUrl($objectData), [], $objectData);
+        return $this->getModel(
+            $this->requestFactory->create(self::POST, $this->urlRender->prepareCreateUrl($objectData), [], $objectData)
+        );
     }
 
     /**
      * @param array $objectData
-     * @return PaginationCollection|mixed
-     * @throws HttpResourceNotFoundException
-     * @throws InfrastructureException
-     * @throws ValidationException
+     * @return ArraySerializable
+     * @throws InternalException
      * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
     public function update(array $objectData)
     {
-        return $this->sendHttpRequest(self::PUT, $this->urlPlaceholderRender->updateUrl($objectData), [], $objectData);
+        return $this->getModel(
+            $this->requestFactory->create(self::PUT, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
+        );
     }
 
     /**
      * @param string $byPropertyName
      * @param $propertyValue
      * @return bool
-     * @throws HttpResourceNotFoundException
      * @throws InfrastructureException
-     * @throws ValidationException
      * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws InternalException
      */
     public function delete(string $byPropertyName, $propertyValue): bool
     {
-        $this->sendHttpRequest(self::DELETE, $this->urlPlaceholderRender->deleteUrl([$byPropertyName => $propertyValue]));
+        $this->sendRequest($this->requestFactory->create(
+            self::DELETE, $this->urlRender->prepareDeleteUrl([$byPropertyName => $propertyValue])
+        ));
 
         return true;
     }
@@ -147,56 +150,51 @@ abstract class HttpMapper extends BaseMapper
     /**
      * @param array $objectData
      * @return Collection|mixed
-     * @throws HttpResourceNotFoundException
-     * @throws InfrastructureException
-     * @throws ValidationException
+     * @throws InternalException
      * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
     public function updatePatch(array $objectData)
     {
-        return $this->sendHttpRequest(self::PATH, $this->urlPlaceholderRender->updateUrl($objectData), [], $objectData);
+        return $this->getModel(
+            $this->requestFactory->create(self::PATH, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
+        );
     }
 
     /**
-     * @param $method
-     * @param $url
-     * @param array $params
-     * @param $body
-     * @return Collection|mixed
+     * @param RequestInterface $request
+     * @return \Infrastructure\Models\Http\ResponseInterface
+     * @throws InternalException
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Infrastructure\Models\Http\IllegalHeaderValueException
      * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
-    protected function sendHttpRequest($method, $url, $params = [], $body = null)
+    protected function sendRequest(RequestInterface $request)
     {
-        if (!$this->headersBuilder->hasHeader('Content-Type')) {
-            $this->headersBuilder->addHeader('Content-Type', self::$defaultContentType);
-        }
+        return $this->getHttpClient()->send($this->mergeDefaultData($request));
+    }
 
-        $request = $this->requestFactory->create(
-            $method,
-            $this->buildUrl($url, $params),
-            $this->headersBuilder->build(),
-            $body
-        );
+    /**
+     * @param RequestInterface $request
+     * @return mixed
+     * @throws InternalException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
+     */
+    protected function getModel(RequestInterface $request): ArraySerializable
+    {
+        return $this->buildObject($this->sendRequest($request)->getParsedBody());
+    }
 
-        $response = $this->getHttpClient()->send($request);
-
-        if ($response->getStatusCode() >= 400) {
-            return $this->errorHandler()->handle($response);
-        }
-
-        if ($response->getBody()->eof()) {
-            return true;
-        }
-
-        $content = $response->getParsedBody();
-
-        if (array_key_exists(Collection::ITEMS, $content)) {
-            return $this->buildCollection($content[Collection::ITEMS]);
-        }
-
-        return $this->buildObject($content);
+    /**
+     * @param RequestInterface $request
+     * @return Collection
+     * @throws InternalException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
+     */
+    protected function getCollection(RequestInterface $request): Collection
+    {
+        return $this->buildCollection($this->sendRequest($request)->getParsedBody());
     }
 
     /**
@@ -223,22 +221,17 @@ abstract class HttpMapper extends BaseMapper
     }
 
     /**
-     * @param string $url
-     * @param array $params
-     * @return string
+     * @param RequestInterface $request
+     * @return RequestInterface
+     * @throws \Infrastructure\Models\Http\IllegalHeaderValueException
      */
-    private function buildUrl(string $url, array $params = [])
+    private function mergeDefaultData(RequestInterface $request)
     {
-        if (!empty($params)) {
-            $separator = strpos($url, '?') === null ? '?' : '&';
-            $url = trim($url, '&') . $separator . http_build_query($params, '&');
-        }
-
-        return $url;
+        return $this->requestFactory->create(
+            $request->getMethod(),
+            $request->getUri(),
+            $this->defaultHeaders->merge(new Headers($request->getHeaders())),
+            $request->getBody()
+        );
     }
-
-    /**
-     * @return HttpMapperErrorHandler
-     */
-    abstract protected function errorHandler(): HttpMapperErrorHandler;
 }

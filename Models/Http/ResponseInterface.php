@@ -10,5 +10,8 @@ interface ResponseInterface extends PsrResponseInterface
     public const CONTENT_TYPE_JSON = 'application/json';
     public const CONTENT_TYPE_XML = 'text/xml';
 
-    public function getParsedBody(): array;
+    /**
+     * @return mixed
+     */
+    public function getParsedBody();
 }

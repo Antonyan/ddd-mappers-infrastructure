@@ -294,5 +294,8 @@ abstract class AbstractResponseDecorator implements ResponseInterface
         return $this->sourceResponse->getReasonPhrase();
     }
 
-    abstract public function getParsedBody(): array;
+    /**
+     * @return mixed
+     */
+    abstract public function getParsedBody();
 }

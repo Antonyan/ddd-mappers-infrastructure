@@ -3,7 +3,9 @@
 namespace Infrastructure\Models\Http;
 
 
-class HeadersBuilder
+use Infrastructure\Models\ArraySerializable;
+
+class Headers implements ArraySerializable
 {
     /**
      * @var array
@@ -23,9 +25,19 @@ class HeadersBuilder
     }
 
     /**
+     * @param Headers $headers
+     * @return Headers
+     * @throws IllegalHeaderValueException
+     */
+    public function merge(Headers $headers): Headers
+    {
+        return new Headers($headers->toArray() + $this->toArray());
+    }
+
+    /**
      * @return array
      */
-    public function build(): array
+    public function toArray(): array
     {
         return $this->headersContainer;
     }
@@ -34,11 +46,11 @@ class HeadersBuilder
      * @param string $name
      * @param $value
      *
-     * @return HeadersBuilder
+     * @return Headers
      *
      * @throws IllegalHeaderValueException
      */
-    public function addHeader(string $name, $value): HeadersBuilder
+    protected function addHeader(string $name, $value): Headers
     {
         if (!is_scalar($value) && !is_array($value)) {
             throw new IllegalHeaderValueException($value);
@@ -61,11 +73,11 @@ class HeadersBuilder
      * @param string $name
      * @param $value
      *
-     * @return HeadersBuilder
+     * @return Headers
      *
      * @throws IllegalHeaderValueException
      */
-    public function addHeaderValue(string $name, $value)
+    protected function addHeaderValue(string $name, $value)
     {
         if (!is_scalar($value)) {
             throw new IllegalHeaderValueException($value);

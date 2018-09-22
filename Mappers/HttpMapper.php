@@ -35,6 +35,7 @@ abstract class HttpMapper extends BaseMapper
     /**
      * @param $conditions
      * @return Collection
+     * @throws EnergonException
      */
     public function load($conditions)
     {

@@ -5,7 +5,7 @@ namespace Infrastructure\Models\Http;
 
 use Psr\Http\Message\RequestInterface;
 
-abstract class AbstractRequestFactory
+interface RequestFactoryInterface
 {
     /**
      * @param $method
@@ -14,5 +14,5 @@ abstract class AbstractRequestFactory
      * @param null $body
      * @return RequestInterface
      */
-    abstract public function create($method, $uri, array $headers = [], $body = null): RequestInterface;
+    public function create($method, $uri, array $headers = [], $body = null): RequestInterface;
 }

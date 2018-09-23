@@ -5,7 +5,7 @@ namespace Infrastructure\Models\Http;
 
 use Psr\Http\Message\RequestInterface;
 
-class GuzzleRequestFactory extends AbstractRequestFactory
+class GuzzleRequestFactoryInterface implements RequestFactoryInterface
 {
     /**
      * @param $method

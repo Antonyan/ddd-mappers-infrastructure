@@ -5,7 +5,7 @@ use Infrastructure\Exceptions\InfrastructureException;
 use Infrastructure\Exceptions\InternalException;
 use Infrastructure\Models\ArraySerializable;
 use Infrastructure\Models\Collection;
-use Infrastructure\Models\Http\AbstractRequestFactory;
+use Infrastructure\Models\Http\RequestFactoryInterface;
 use Infrastructure\Models\Http\Headers;
 use Infrastructure\Models\Http\HttpClient;
 use Infrastructure\Models\Http\UrlRender;
@@ -37,7 +37,7 @@ abstract class HttpMapper extends BaseMapper
     private $defaultHeaders;
 
     /**
-     * @var AbstractRequestFactory
+     * @var RequestFactoryInterface
      */
     private $requestFactory;
 
@@ -50,10 +50,10 @@ abstract class HttpMapper extends BaseMapper
      * HttpMapper constructor.
      * @param array $httpMapperConfig
      * @param HttpClient $httpClient
-     * @param AbstractRequestFactory $requestFactory
+     * @param RequestFactoryInterface $requestFactory
      * @throws \Infrastructure\Models\Http\IllegalHeaderValueException
      */
-    public function __construct(array $httpMapperConfig, HttpClient $httpClient, AbstractRequestFactory $requestFactory)
+    public function __construct(array $httpMapperConfig, HttpClient $httpClient, RequestFactoryInterface $requestFactory)
     {
         $this->httpClient = $httpClient;
         $this->requestFactory = $requestFactory;
@@ -72,7 +72,7 @@ abstract class HttpMapper extends BaseMapper
     {
         $params = $this->prepareParams($filter);
 
-        $result = $this->getCollection($this->requestFactory->create(
+        $result = $this->sendRequestForCollection($this->requestFactory->create(
             self::GET,
             $this->urlRender->prepareLoadUrl([], $params)
         ));
@@ -91,7 +91,7 @@ abstract class HttpMapper extends BaseMapper
      */
     public function get(array $identifiers) : ArraySerializable
     {
-        return $this->getModel(
+        return $this->sendRequestForEntity(
             $this->requestFactory->create(self::GET, $this->urlRender->prepareGetUrl($identifiers))
         );
     }
@@ -104,7 +104,7 @@ abstract class HttpMapper extends BaseMapper
      */
     public function create(array $objectData): ArraySerializable
     {
-        return $this->getModel(
+        return $this->sendRequestForEntity(
             $this->requestFactory->create(self::POST, $this->urlRender->prepareCreateUrl($objectData), [], $objectData)
         );
     }
@@ -117,7 +117,7 @@ abstract class HttpMapper extends BaseMapper
      */
     public function update(array $objectData): ArraySerializable
     {
-        return $this->getModel(
+        return $this->sendRequestForEntity(
             $this->requestFactory->create(self::PUT, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
         );
     }
@@ -147,7 +147,7 @@ abstract class HttpMapper extends BaseMapper
      */
     public function updatePatch(array $objectData): ArraySerializable
     {
-        return $this->getModel(
+        return $this->sendRequestForEntity(
             $this->requestFactory->create(self::PATH, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
         );
     }
@@ -170,7 +170,7 @@ abstract class HttpMapper extends BaseMapper
      * @throws InternalException
      * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
-    protected function getModel(RequestInterface $request): ArraySerializable
+    protected function sendRequestForEntity(RequestInterface $request): ArraySerializable
     {
         return $this->buildObject($this->sendRequest($request)->getParsedBody());
     }
@@ -181,7 +181,7 @@ abstract class HttpMapper extends BaseMapper
      * @throws InternalException
      * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
-    protected function getCollection(RequestInterface $request): Collection
+    protected function sendRequestForCollection(RequestInterface $request): Collection
     {
         return $this->buildCollection($this->sendRequest($request)->getParsedBody());
     }

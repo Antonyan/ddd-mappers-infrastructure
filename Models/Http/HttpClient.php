@@ -4,7 +4,9 @@ namespace Infrastructure\Models\Http;
 
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
+use Infrastructure\Exceptions\InfrastructureException;
 use Infrastructure\Exceptions\InternalException;
 use Infrastructure\Models\Http\Response\ResponseFactory;
 use Psr\Http\Message\RequestInterface;
@@ -32,7 +34,6 @@ class HttpClient
      * @return ResponseInterface
      * @throws InternalException
      * @throws Response\ResponseContentTypeException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function send(RequestInterface $request): ResponseInterface
     {
@@ -48,6 +49,8 @@ class HttpClient
                 $exception,
                 $exception->getCode()
             );
+        } catch (GuzzleException $exception) {
+            throw new InfrastructureException('Guzzle Exception', $exception);
         }
     }
 }

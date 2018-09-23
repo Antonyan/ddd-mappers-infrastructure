@@ -3,10 +3,9 @@ namespace Infrastructure\Mappers;
 
 use Infrastructure\Exceptions\InfrastructureException;
 use Infrastructure\Exceptions\InternalException;
-use Infrastructure\Exceptions\ValidationException;
 use Infrastructure\Models\ArraySerializable;
 use Infrastructure\Models\Collection;
-use Infrastructure\Models\Http\AbstractRequestFactory;
+use Infrastructure\Models\Http\RequestFactoryInterface;
 use Infrastructure\Models\Http\Headers;
 use Infrastructure\Models\Http\HttpClient;
 use Infrastructure\Models\Http\UrlRender;
@@ -38,7 +37,7 @@ abstract class HttpMapper extends BaseMapper
     private $defaultHeaders;
 
     /**
-     * @var AbstractRequestFactory
+     * @var RequestFactoryInterface
      */
     private $requestFactory;
 
@@ -51,10 +50,10 @@ abstract class HttpMapper extends BaseMapper
      * HttpMapper constructor.
      * @param array $httpMapperConfig
      * @param HttpClient $httpClient
-     * @param AbstractRequestFactory $requestFactory
+     * @param RequestFactoryInterface $requestFactory
      * @throws \Infrastructure\Models\Http\IllegalHeaderValueException
      */
-    public function __construct(array $httpMapperConfig, HttpClient $httpClient, AbstractRequestFactory $requestFactory)
+    public function __construct(array $httpMapperConfig, HttpClient $httpClient, RequestFactoryInterface $requestFactory)
     {
         $this->httpClient = $httpClient;
         $this->requestFactory = $requestFactory;
@@ -67,15 +66,13 @@ abstract class HttpMapper extends BaseMapper
      * @param SearchCriteria $filter
      * @return PaginationCollection
      * @throws InfrastructureException
-     * @throws ValidationException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws InternalException
      */
     public function load(SearchCriteria $filter): PaginationCollection
     {
         $params = $this->prepareParams($filter);
 
-        $result = $this->getCollection($this->requestFactory->create(
+        $result = $this->sendRequestForCollection($this->requestFactory->create(
             self::GET,
             $this->urlRender->prepareLoadUrl([], $params)
         ));
@@ -90,12 +87,11 @@ abstract class HttpMapper extends BaseMapper
      * @param array $identifiers
      * @return ArraySerializable
      * @throws InfrastructureException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws InternalException
      */
     public function get(array $identifiers) : ArraySerializable
     {
-        return $this->getModel(
+        return $this->sendRequestForEntity(
             $this->requestFactory->create(self::GET, $this->urlRender->prepareGetUrl($identifiers))
         );
     }
@@ -104,13 +100,11 @@ abstract class HttpMapper extends BaseMapper
      * @param array $objectData
      * @return ArraySerializable
      * @throws InfrastructureException
-     * @throws ValidationException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws InternalException
      */
     public function create(array $objectData): ArraySerializable
     {
-        return $this->getModel(
+        return $this->sendRequestForEntity(
             $this->requestFactory->create(self::POST, $this->urlRender->prepareCreateUrl($objectData), [], $objectData)
         );
     }
@@ -119,12 +113,11 @@ abstract class HttpMapper extends BaseMapper
      * @param array $objectData
      * @return ArraySerializable
      * @throws InternalException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
-    public function update(array $objectData)
+    public function update(array $objectData): ArraySerializable
     {
-        return $this->getModel(
+        return $this->sendRequestForEntity(
             $this->requestFactory->create(self::PUT, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
         );
     }
@@ -134,7 +127,6 @@ abstract class HttpMapper extends BaseMapper
      * @param $propertyValue
      * @return bool
      * @throws InfrastructureException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws InternalException
      */
     public function delete(string $byPropertyName, $propertyValue): bool
@@ -151,12 +143,11 @@ abstract class HttpMapper extends BaseMapper
      * @param array $objectData
      * @return Collection|mixed
      * @throws InternalException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
-    public function updatePatch(array $objectData)
+    public function updatePatch(array $objectData): ArraySerializable
     {
-        return $this->getModel(
+        return $this->sendRequestForEntity(
             $this->requestFactory->create(self::PATH, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
         );
     }
@@ -165,7 +156,7 @@ abstract class HttpMapper extends BaseMapper
      * @param RequestInterface $request
      * @return \Infrastructure\Models\Http\ResponseInterface
      * @throws InternalException
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Infrastructure\Models\Http\IllegalHeaderValueException
      * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
     protected function sendRequest(RequestInterface $request)
@@ -177,10 +168,9 @@ abstract class HttpMapper extends BaseMapper
      * @param RequestInterface $request
      * @return mixed
      * @throws InternalException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
-    protected function getModel(RequestInterface $request): ArraySerializable
+    protected function sendRequestForEntity(RequestInterface $request): ArraySerializable
     {
         return $this->buildObject($this->sendRequest($request)->getParsedBody());
     }
@@ -189,10 +179,9 @@ abstract class HttpMapper extends BaseMapper
      * @param RequestInterface $request
      * @return Collection
      * @throws InternalException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
-    protected function getCollection(RequestInterface $request): Collection
+    protected function sendRequestForCollection(RequestInterface $request): Collection
     {
         return $this->buildCollection($this->sendRequest($request)->getParsedBody());
     }

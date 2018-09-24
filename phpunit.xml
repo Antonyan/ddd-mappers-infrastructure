@@ -30,7 +30,7 @@
         </testsuite>
         <testsuite name="Models/Http">
             <directory>tests/Models/Http</directory>
-            <file>tests/Models/Http/UrlRender.php</file>
+
         </testsuite>
     </testsuites>
 

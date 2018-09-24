@@ -66,56 +66,56 @@ class UrlRenderTest extends TestCase
 
     /**
      * @see UrlRender::render()
-     * @throws \ReflectionException
      */
     public function testRender()
     {
-        $urlRender = $this->getMockBuilder(UrlRender::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['extractPlaceholders'])
-            ->getMock();
-
         $urls = ['test_url' => 'http://test.com/:property_1/:property_2'];
         $data = ['property_1' => 'value_1', 'property_2' => 'value_2'];
-
-        $urlRender
-            ->expects($this->once())
-            ->method('extractPlaceholders')
-            ->with($data)
-            ->willReturn([':property_1', ':property_2']);
-
-        $this->setPrivatePropertyInMock($urlRender, 'urlsPlaceholders', $urls);
-
+        $urlRender = new UrlRender($urls);
 
         /** @var $urlRender UrlRender */
         $this->assertEquals("http://test.com/value_1/value_2", $urlRender->render('test_url', $data));
     }
 
-    public function testPrepareDeleteUrl()
+    /**
+     * @see          UrlRender::prepareLoadUrl()
+     * @see          UrlRender::prepareGetUrl()
+     * @see          UrlRender::prepareCreateUrl()
+     * @see          UrlRender::prepareUpdateUrl()
+     * @see          UrlRender::prepareDeleteUrl()
+     *
+     * @dataProvider prepareTestDataProvider
+     * @param string $method
+     * @param array $urlTemplates
+     * @param array $data
+     * @param string $expectUrl
+     */
+    public function testPrepareUrl(string $method, array $urlTemplates, array $data, string $expectUrl)
     {
-
+        $this->assertEquals($expectUrl, call_user_func([(new UrlRender($urlTemplates)), $method], $data));
     }
 
-    public function testPrepareGetUrl()
+    /**
+     * @return array
+     */
+    public function prepareTestDataProvider()
     {
+        $ulrTemplates = [
+            UrlRender::LOAD_URL => 'domain/:property_1',
+            UrlRender::GET_URL => 'domain/:property_1',
+            UrlRender::CREATE_URL => 'domain/:property_1',
+            UrlRender::UPDATE_URL => 'domain/:property_1',
+            UrlRender::DELETE_URL => 'domain/:property_1',
+        ];
 
+        return [
+            ['prepareLoadUrl', $ulrTemplates, ['property_1' => 'load_value'], 'domain/load_value'],
+            ['prepareGetUrl', $ulrTemplates, ['property_1' => 'get_value'], 'domain/get_value'],
+            ['prepareCreateUrl', $ulrTemplates, ['property_1' => 'create_value'], 'domain/create_value'],
+            ['prepareUpdateUrl', $ulrTemplates, ['property_1' => 'update_value'], 'domain/update_value'],
+            ['prepareDeleteUrl', $ulrTemplates, ['property_1' => 'delete_value'], 'domain/delete_value'],
+        ];
     }
-
-    public function testPrepareLoadUrl()
-    {
-
-    }
-
-    public function testPrepareUpdateUrl()
-    {
-
-    }
-
-    public function testPrepareCreateUrl()
-    {
-
-    }
-
 
     /**
      * @return array

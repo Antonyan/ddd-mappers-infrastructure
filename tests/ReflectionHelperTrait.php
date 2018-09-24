@@ -3,7 +3,6 @@
 namespace Infrastructure\Tests;
 
 
-
 trait ReflectionHelperTrait
 {
     /**
@@ -46,6 +45,23 @@ trait ReflectionHelperTrait
      * @return mixed
      * @throws \ReflectionException
      */
+    private function getPrivatePropertyFromMock($object, string $property)
+    {
+        $reflector = new \ReflectionClass(get_parent_class($object));
+
+        $property = $reflector->getProperty($property);
+        $property->setAccessible(true);
+
+        return $property->getValue($object);
+    }
+
+    /**
+     * @param $object
+     * @param string $property
+     * @param $value
+     * @return mixed
+     * @throws \ReflectionException
+     */
     private function setPrivatePropertyInMock($object, string $property, $value)
     {
         $reflector = new \ReflectionClass(get_parent_class($object));
@@ -73,5 +89,20 @@ trait ReflectionHelperTrait
         $property->setValue($object, $value);
 
         return $object;
+    }
+
+    /**
+     * @param string $class
+     * @return object
+     * @throws \ReflectionException
+     */
+    private function createInstance(string $class)
+    {
+        if (!class_exists($class)) {
+            throw new \InvalidArgumentException("'$class'' does not exist");
+        }
+
+        $class = new \ReflectionClass($class);
+        return $class->newInstanceWithoutConstructor();
     }
 }

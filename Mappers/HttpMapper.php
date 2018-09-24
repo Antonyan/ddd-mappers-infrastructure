@@ -1,21 +1,30 @@
 <?php
 namespace Infrastructure\Mappers;
 
-use Modules\LibraryModule\Exceptions\EnergonException;
-use Modules\LibraryModule\Models\ArraySerializable;
-use Modules\LibraryModule\Models\Collection;
-use Modules\LibraryModule\Models\PaginationCollection;
-use Modules\LibraryModule\Services\HttpClient;
+use Infrastructure\Exceptions\InfrastructureException;
+use Infrastructure\Exceptions\InternalException;
+use Infrastructure\Models\ArraySerializable;
+use Infrastructure\Models\Collection;
+use Infrastructure\Models\Http\RequestFactoryInterface;
+use Infrastructure\Models\Http\Headers;
+use Infrastructure\Models\Http\HttpClient;
+use Infrastructure\Models\Http\UrlRender;
+use Infrastructure\Models\PaginationCollection;
+use Infrastructure\Models\SearchCriteria\SearchCriteria;
+use Psr\Http\Message\RequestInterface;
 
 abstract class HttpMapper extends BaseMapper
 {
-    const LOAD_URL = 'loadUrl';
-    const GET_URL = 'getUrl';
-    const CREATE_URL = 'createUrl';
-    const UPDATE_URL = 'updateUrl';
-    const DELETE_URL = 'deleteUrl';
+    public const LINKS_FIELD = 'links';
 
-    const LINKS_FIELD = 'links';
+    public const AVAILABLE_URLS = 'availableUrls';
+    public const DEFAULT_HEADERS = 'defaultHeaders';
+
+    protected const GET = 'GET';
+    protected const POST = 'POST';
+    protected const PUT = 'PUT';
+    protected const PATH = 'PATH';
+    protected const DELETE = 'DELETE';
 
     /**
      * @var HttpClient
@@ -23,143 +32,158 @@ abstract class HttpMapper extends BaseMapper
     private $httpClient = null;
 
     /**
-     * @var array
+     * @var Headers
      */
-    private $httpMapperConfig = null;
+    private $defaultHeaders;
 
-    public function __construct(array $httpMapperConfig, HttpClient $httpClient)
+    /**
+     * @var RequestFactoryInterface
+     */
+    private $requestFactory;
+
+    /**
+     * @var UrlRender
+     */
+    private $urlRender;
+
+    /**
+     * HttpMapper constructor.
+     * @param array $httpMapperConfig
+     * @param HttpClient $httpClient
+     * @param RequestFactoryInterface $requestFactory
+     * @throws \Infrastructure\Models\Http\IllegalHeaderValueException
+     */
+    public function __construct(array $httpMapperConfig, HttpClient $httpClient, RequestFactoryInterface $requestFactory)
     {
-        $this->setHttpMapperConfig($httpMapperConfig)->setHttpClient($httpClient);
+        $this->httpClient = $httpClient;
+        $this->requestFactory = $requestFactory;
+
+        $this->defaultHeaders = new Headers($httpMapperConfig[self::DEFAULT_HEADERS] ?? []);
+        $this->urlRender = new UrlRender($httpMapperConfig[self::AVAILABLE_URLS]);
     }
 
     /**
-     * @param $conditions
-     * @return Collection
-     * @throws EnergonException
+     * @param SearchCriteria $filter
+     * @return PaginationCollection
+     * @throws InfrastructureException
+     * @throws InternalException
      */
-    public function load($conditions)
+    public function load(SearchCriteria $filter): PaginationCollection
     {
-        return $this->sendHttpRequest('GET', $this->getHttpMapperConfig(self::LOAD_URL), ['query' => $conditions]);
+        $params = $this->prepareParams($filter);
+
+        $result = $this->sendRequestForCollection($this->requestFactory->create(
+            self::GET,
+            $this->urlRender->prepareLoadUrl([], $params)
+        ));
+
+        $paginationCollection = new PaginationCollection(count($result), $filter->limit(), $filter->offset());
+        $paginationCollection->merge($result);
+
+        return $paginationCollection;
     }
 
     /**
-     * @param $identifierValue
+     * @param array $identifiers
      * @return ArraySerializable
-     * @throws EnergonException
+     * @throws InfrastructureException
+     * @throws InternalException
      */
-    public function get($identifierValue)
+    public function get(array $identifiers) : ArraySerializable
     {
-        return $this->sendHttpRequest('GET', $this->getUrlWithIdentifier($identifierValue, self::GET_URL), []);
+        return $this->sendRequestForEntity(
+            $this->requestFactory->create(self::GET, $this->urlRender->prepareGetUrl($identifiers))
+        );
     }
 
     /**
-     * @param $identifierValue
-     * @return bool
-     * @throws EnergonException
+     * @param array $objectData
+     * @return ArraySerializable
+     * @throws InfrastructureException
+     * @throws InternalException
      */
-    public function delete($identifierValue)
+    public function create(array $objectData): ArraySerializable
     {
-        $this->sendHttpRequest('DELETE', $this->getUrlWithIdentifier($identifierValue, self::DELETE_URL), []);
+        return $this->sendRequestForEntity(
+            $this->requestFactory->create(self::POST, $this->urlRender->prepareCreateUrl($objectData), [], $objectData)
+        );
+    }
+
+    /**
+     * @param array $objectData
+     * @return ArraySerializable
+     * @throws InternalException
+     * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
+     */
+    public function update(array $objectData): ArraySerializable
+    {
+        return $this->sendRequestForEntity(
+            $this->requestFactory->create(self::PUT, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
+        );
+    }
+
+    /**
+     * @param string $byPropertyName
+     * @param $propertyValue
+     * @return bool
+     * @throws InfrastructureException
+     * @throws InternalException
+     */
+    public function delete(string $byPropertyName, $propertyValue): bool
+    {
+        $this->sendRequest($this->requestFactory->create(
+            self::DELETE, $this->urlRender->prepareDeleteUrl([$byPropertyName => $propertyValue])
+        ));
+
         return true;
     }
 
+
     /**
-     * @param ArraySerializable $object
-     * @return ArraySerializable
-     * @throws EnergonException
+     * @param array $objectData
+     * @return Collection|mixed
+     * @throws InternalException
+     * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
-    public function create(ArraySerializable $object)
+    public function updatePatch(array $objectData): ArraySerializable
     {
-        return $this->sendHttpRequest('POST',
-            $this->getHttpMapperConfig(self::CREATE_URL),
-            ['json' => $object->toArray()]
+        return $this->sendRequestForEntity(
+            $this->requestFactory->create(self::PATH, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
         );
     }
 
     /**
-     * @param ArraySerializable $object
-     * @param $identifierName
-     * @return ArraySerializable
-     * @throws EnergonException
+     * @param RequestInterface $request
+     * @return \Infrastructure\Models\Http\ResponseInterface
+     * @throws InternalException
+     * @throws \Infrastructure\Models\Http\IllegalHeaderValueException
+     * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
-    public function update(ArraySerializable $object, $identifierName)
+    protected function sendRequest(RequestInterface $request)
     {
-        return $this->sendHttpRequest('PUT',
-            $this->getUrlWithObjectAndIdentifier($object, $identifierName, self::UPDATE_URL),
-            ['json' => $object->toArray()]
-        );
+        return $this->getHttpClient()->send($this->mergeDefaultData($request));
     }
 
     /**
-     * @param ArraySerializable $object
-     * @param $identifierName
-     * @throws EnergonException
-     * @return ArraySerializable
+     * @param RequestInterface $request
+     * @return mixed
+     * @throws InternalException
+     * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
-    public function updatePatch(ArraySerializable $object, $identifierName)
+    protected function sendRequestForEntity(RequestInterface $request): ArraySerializable
     {
-        return $this->sendHttpRequest('PATCH',
-            $this->getUrlWithObjectAndIdentifier($object, $identifierName, self::UPDATE_URL),
-            ['json' => $object->toArray()]
-        );
+        return $this->buildObject($this->sendRequest($request)->getParsedBody());
     }
 
     /**
-     * @param $action
-     * @param $url
-     * @param $options
-     * @return ArraySerializable|\Modules\LibraryModule\Models\Collection|void
-     * @throws EnergonException
+     * @param RequestInterface $request
+     * @return Collection
+     * @throws InternalException
+     * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
-    protected function sendHttpRequest($action, $url, $options)
+    protected function sendRequestForCollection(RequestInterface $request): Collection
     {
-        $content = $this->getHttpClient()->sendHttpRequest($action, $url, $options)->getBody();
-        
-        if($content === null){
-            return true;
-        }
-
-        if(array_key_exists('items', $content)){
-            return $this->buildPaginationCollection($content);
-        }
-
-        return $this->buildObject($content);
-    }
-
-    /**
-     * @deprecated
-     * @param $action
-     * @param $url
-     * @param $options
-     * @return ArraySerializable|\Modules\LibraryModule\Models\Collection|void
-     * @throws EnergonException
-     */
-    protected function sendHttpRequestForGetStatus($action, $url, $options)
-    {
-        return $this->getHttpClient()->sendHttpRequestForGetStatus($action, $url, $options);
-    }
-
-    /**
-     * @param ArraySerializable $object
-     * @param $identifierName
-     * @param $urlName
-     * @return string
-     */
-    protected function getUrlWithObjectAndIdentifier(ArraySerializable $object, $identifierName, $urlName)
-    {
-        $identifier = $object->toArray()[$identifierName];
-        return vsprintf($this->getHttpMapperConfig($urlName), [$identifier]);
-    }
-
-    /**
-     * @param $identifierValue
-     * @param $url
-     * @return string
-     */
-    private function getUrlWithIdentifier($identifierValue, $url)
-    {
-        $urlTemplate = $this->getHttpMapperConfig($url);
-        return vsprintf($urlTemplate, [$identifierValue]);
+        return $this->buildCollection($this->sendRequest($request)->getParsedBody());
     }
 
     /**
@@ -171,56 +195,32 @@ abstract class HttpMapper extends BaseMapper
     }
 
     /**
-     * @param HttpClient $httpClient
-     * @return HttpMapper
+     * @param SearchCriteria $filter
+     * @return array
      */
-    private function setHttpClient($httpClient)
+    private function prepareParams(SearchCriteria $filter): array
     {
-        $this->httpClient = $httpClient;
+        $params = array_merge([
+            SearchCriteria::LIMIT => $filter->limit(),
+            SearchCriteria::OFFSET => $filter->offset()
+        ], $filter->orderBy());
 
-        return $this;
+        $params = array_merge($params, $filter->conditions());
+        return $params;
     }
 
     /**
-     * @param $urlName
-     * @return mixed
+     * @param RequestInterface $request
+     * @return RequestInterface
+     * @throws \Infrastructure\Models\Http\IllegalHeaderValueException
      */
-    protected function getHttpMapperConfig($urlName)
+    private function mergeDefaultData(RequestInterface $request)
     {
-        return $this->httpMapperConfig[$urlName];
-    }
-
-    /**
-     * @param array $httpMapperConfig
-     * @return HttpMapper
-     */
-    private function setHttpMapperConfig($httpMapperConfig)
-    {
-        $this->httpMapperConfig = $httpMapperConfig;
-
-        return $this;
-    }
-
-    /**
-     * @param array $objectsParams
-     * @return PaginationCollection
-     */
-    protected function buildPaginationCollection(array $objectsParams)
-    {
-        $collection = new PaginationCollection();
-        $collection->setTotalResult(array_key_exists(
-            PaginationCollection::TOTAL_RESULTS, $objectsParams) ? $objectsParams[PaginationCollection::TOTAL_RESULTS] : 0
+        return $this->requestFactory->create(
+            $request->getMethod(),
+            $request->getUri(),
+            $this->defaultHeaders->merge(new Headers($request->getHeaders())),
+            $request->getBody()
         );
-        $collection->setLimit(array_key_exists(
-            PaginationCollection::LIMIT, $objectsParams) ? $objectsParams[PaginationCollection::LIMIT] : 0
-        );
-        $collection->setOffset(array_key_exists(
-            PaginationCollection::OFFSET, $objectsParams) ? $objectsParams[PaginationCollection::OFFSET] : 0
-        );
-        foreach ($objectsParams['items'] as $objectParams) {
-            $collection->push($this->buildObjectOptionalFields($objectParams));
-        }
-
-        return $collection;
     }
 }

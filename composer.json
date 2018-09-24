@@ -20,7 +20,8 @@
         "doctrine/annotations": "^1.6",
         "symfony/validator": "^4.1",
         "vlucas/phpdotenv": "^2.5",
-        "doctrine/dbal": "^2.8"
+        "doctrine/dbal": "^2.8",
+        "guzzlehttp/guzzle": "^6.3"
     },
 
     "autoload": {

@@ -28,6 +28,10 @@
             <directory>tests/Mappers</directory>
             <file>tests/Mappers/BaseMapperTest.php</file>
         </testsuite>
+        <testsuite name="Models/Http">
+            <directory>tests/Models/Http</directory>
+            <file>tests/Models/Http/UrlRender.php</file>
+        </testsuite>
     </testsuites>
 
     <filter>

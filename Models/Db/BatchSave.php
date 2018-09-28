@@ -12,7 +12,7 @@ class BatchSave
     private $table;
 
     /**
-     * @var array
+     * @var \ArrayIterator
      */
     private $parametersList;
 
@@ -44,7 +44,7 @@ class BatchSave
     public function __construct(string $table, array $parametersList)
     {
         $this->table = $table;
-        $this->parametersList = $parametersList;
+        $this->parametersList = new \ArrayIterator($parametersList);
     }
 
     /**
@@ -77,7 +77,7 @@ class BatchSave
             $conditions .= $filed . ' = VALUES(' . $filed . '),';
         }
 
-        return trim($conditions, ',');;
+        return trim($conditions, ',');
     }
 
     /**
@@ -90,19 +90,19 @@ class BatchSave
             return $this->fields;
         }
 
-        if (! \count($this->parametersList)) {
+        if (! $this->parametersList->count()) {
             throw new InfrastructureException('You should pass at least one entity for batchInsert');
         }
 
-        if (! is_array($this->parametersList[0])) {
+        if (! is_array($this->parametersList->current())) {
             throw new InfrastructureException('Value instead of entity was send for batchInsert');
         }
 
-        if (! \count($this->parametersList[0])) {
+        if (! \count($this->parametersList->current())) {
             throw new InfrastructureException('Empty entity was send for batchInsert');
         }
 
-        $this->fields = array_keys($this->parametersList[0]);
+        $this->fields = array_keys($this->parametersList->current());
 
         return $this->fields;
     }

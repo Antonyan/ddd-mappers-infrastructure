@@ -1,5 +1,5 @@
 <?php
-namespace App\Commands;
+namespace Infrastructure\Services;
 
 use Infrastructure\Models\Config;
 use Infrastructure\Models\ServiceContainerBuilderFactory;

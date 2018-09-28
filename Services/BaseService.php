@@ -10,7 +10,7 @@ use ReflectionException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\BadMethodCallException;
 
-class BaseService
+abstract class BaseService
 {
     /**
      * @var ContainerBuilder

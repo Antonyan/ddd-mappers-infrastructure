@@ -82,6 +82,7 @@ class BatchSave
 
     /**
      * @return array
+     * @throws InfrastructureException
      */
     private function fields() : array
     {
@@ -89,7 +90,16 @@ class BatchSave
             return $this->fields;
         }
 
+        if (! \count($this->parametersList)) {
+            throw new InfrastructureException('You should pass at least one entity for batchInsert');
+        }
+
+        if (! \count($this->parametersList[0])) {
+            throw new InfrastructureException('Empty entity was send for batchInsert');
+        }
+
         $this->fields = array_keys($this->parametersList[0]);
+
         return $this->fields;
     }
 

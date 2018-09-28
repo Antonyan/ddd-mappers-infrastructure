@@ -201,7 +201,7 @@ abstract class DbMapper extends BaseMapper
             $conditions[] = new EqualCriteria($indName, $indValue);
         }
 
-        return $this->load(new SearchCriteriaConstructor($conditions))->getFirst();
+        return $this->load(new SearchCriteriaConstructor($conditions, 1))->getFirst();
     }
 
     /**

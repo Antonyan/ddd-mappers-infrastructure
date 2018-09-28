@@ -94,6 +94,10 @@ class BatchSave
             throw new InfrastructureException('You should pass at least one entity for batchInsert');
         }
 
+        if (! is_array($this->parametersList[0])) {
+            throw new InfrastructureException('Value instead of entity was send for batchInsert');
+        }
+
         if (! \count($this->parametersList[0])) {
             throw new InfrastructureException('Empty entity was send for batchInsert');
         }

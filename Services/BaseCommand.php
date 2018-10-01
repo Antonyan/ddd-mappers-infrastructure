@@ -1,16 +1,12 @@
 <?php
-
 namespace Infrastructure\Services;
 
-use Exception;
-use Infrastructure\Exceptions\InfrastructureException;
 use Infrastructure\Models\Config;
 use Infrastructure\Models\ServiceContainerBuilderFactory;
-use ReflectionException;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Exception\BadMethodCallException;
 
-abstract class BaseService
+abstract class BaseCommand extends Command
 {
     /**
      * @var ContainerBuilder
@@ -19,9 +15,6 @@ abstract class BaseService
 
     /**
      * @return ContainerBuilder
-     * @throws ReflectionException
-     * @throws InfrastructureException
-     * @throws Exception
      */
     protected function container() : ContainerBuilder
     {
@@ -34,8 +27,6 @@ abstract class BaseService
 
     /**
      * @return Config
-     * @throws ReflectionException
-     * @throws Exception
      */
     protected function config() : Config
     {

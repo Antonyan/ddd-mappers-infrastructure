@@ -17,15 +17,6 @@ abstract class BaseMapper
 
     /**
      * @param array $objectData
-     * @return ArraySerializable
-     */
-    protected function buildObjectOptionalFields(array $objectData)
-    {
-        return $this->buildObject($objectData);
-    }
-
-    /**
-     * @param array $objectData
      * @return mixed
      */
     abstract public function create(array $objectData);
@@ -84,7 +75,7 @@ abstract class BaseMapper
     {
         $collection = new Collection();
         foreach ($objectsParams as $objectParams) {
-            $collection->push($this->buildObjectOptionalFields($objectParams));
+            $collection->push($this->buildObject($objectParams));
         }
 
         return $collection;

@@ -219,7 +219,7 @@ abstract class HttpMapper extends BaseMapper
         return $this->requestFactory->create(
             $request->getMethod(),
             $request->getUri(),
-            $this->defaultHeaders->merge(new Headers($request->getHeaders())),
+            $this->defaultHeaders->merge(new Headers($request->getHeaders()))->toArray(),
             $request->getBody()
         );
     }

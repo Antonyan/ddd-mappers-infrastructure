@@ -24,6 +24,23 @@ trait ReflectionHelperTrait
 
     /**
      * @param $object
+     * @param string $method
+     * @param mixed ...$arguments
+     * @return mixed
+     * @throws \ReflectionException
+     */
+    private function callPrivateMethodFromMock($object, string $method, ...$arguments)
+    {
+        $reflector = new \ReflectionClass(get_parent_class($object));
+
+        $method = $reflector->getMethod($method);
+        $method->setAccessible(true);
+
+        return $method->invokeArgs($object, $arguments);
+    }
+
+    /**
+     * @param $object
      * @param string $property
      * @return mixed
      * @throws \ReflectionException

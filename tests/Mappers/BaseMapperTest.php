@@ -24,7 +24,7 @@ class BaseMapperTest extends TestCase
     public function testBuildCollection()
     {
         $baseMapper = $this->getMockBuilder(BaseMapper::class)
-            ->setMethods(['buildObjectOptionalFields'])
+            ->setMethods(['buildObject'])
             ->getMockForAbstractClass();
 
         $testData1 = ['property_1' => uniqid(), 'property_2' => uniqid()];
@@ -35,7 +35,7 @@ class BaseMapperTest extends TestCase
 
         $baseMapper
             ->expects($this->exactly(count($testData)))
-            ->method('buildObjectOptionalFields')
+            ->method('buildObject')
             ->willReturn(
                 ...array_map([$this, 'createArraySerializableObject'], $testData)
             );
@@ -78,25 +78,5 @@ class BaseMapperTest extends TestCase
         $this->assertEquals($limit, $paginationCollection->getLimit());
         $this->assertEquals($offset, $paginationCollection->getOffset());
         $this->assertEquals($paginationCollection->getCollection(), $testCollection->getCollection());
-    }
-
-    /**
-     * @see BaseMapper::buildObjectOptionalFields()
-     */
-    public function testBuildObjectOptionalFields()
-    {
-        $testData = [[uniqid()], [uniqid()]];
-
-        $baseMapper = $this->getMockBuilder(BaseMapper::class)
-            ->setMethods(['buildObject'])
-            ->getMockForAbstractClass();
-
-        $baseMapper
-            ->expects($this->once())
-            ->method('buildObject')
-            ->with($testData)
-            ->willReturn($testData);
-
-        $this->assertEquals($testData, $this->callMethod($baseMapper, 'buildObjectOptionalFields', $testData));
     }
 }

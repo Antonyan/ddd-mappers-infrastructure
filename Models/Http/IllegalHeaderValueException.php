@@ -9,6 +9,6 @@ class IllegalHeaderValueException extends InfrastructureException
 {
     public function __construct($value)
     {
-        parent::__construct('Illegal type value: ' . is_object($value) ? get_class($value) : gettype($value));
+        parent::__construct('Illegal type value: ' . (is_object($value) ? get_class($value) : gettype($value)));
     }
 }

@@ -11,6 +11,7 @@ use Infrastructure\Models\Http\HttpClient;
 use Infrastructure\Models\Http\UrlRender;
 use Infrastructure\Models\PaginationCollection;
 use Infrastructure\Models\SearchCriteria\SearchCriteria;
+use Infrastructure\Services\BaseFactory;
 use Psr\Http\Message\RequestInterface;
 
 abstract class HttpMapper extends BaseMapper
@@ -32,6 +33,11 @@ abstract class HttpMapper extends BaseMapper
     private $httpClient = null;
 
     /**
+     * @var BaseFactory
+     */
+    private $factory;
+
+    /**
      * @var Headers
      */
     private $defaultHeaders;
@@ -48,15 +54,24 @@ abstract class HttpMapper extends BaseMapper
 
     /**
      * HttpMapper constructor.
+     *
      * @param array $httpMapperConfig
      * @param HttpClient $httpClient
      * @param RequestFactoryInterface $requestFactory
+     * @param BaseFactory $factory
+     *
      * @throws \Infrastructure\Models\Http\IllegalHeaderValueException
      */
-    public function __construct(array $httpMapperConfig, HttpClient $httpClient, RequestFactoryInterface $requestFactory)
+    public function __construct(
+        array $httpMapperConfig,
+        HttpClient $httpClient,
+        RequestFactoryInterface $requestFactory,
+        BaseFactory $factory
+    )
     {
         $this->httpClient = $httpClient;
         $this->requestFactory = $requestFactory;
+        $this->factory = $factory;
 
         $this->defaultHeaders = new Headers($httpMapperConfig[self::DEFAULT_HEADERS] ?? []);
         $this->urlRender = new UrlRender($httpMapperConfig[self::AVAILABLE_URLS]);
@@ -102,11 +117,9 @@ abstract class HttpMapper extends BaseMapper
      * @throws InfrastructureException
      * @throws InternalException
      */
-    public function create(array $objectData): ArraySerializable
+    public function create(array $objectData)
     {
-        return $this->sendRequestForEntity(
-            $this->requestFactory->create(self::POST, $this->urlRender->prepareCreateUrl($objectData), [], $objectData)
-        );
+        return $this->createObject($objectData);
     }
 
     /**
@@ -115,11 +128,9 @@ abstract class HttpMapper extends BaseMapper
      * @throws InternalException
      * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
-    public function update(array $objectData): ArraySerializable
+    public function update(array $objectData)
     {
-        return $this->sendRequestForEntity(
-            $this->requestFactory->create(self::PUT, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
-        );
+        return $this->updateByHttpMethod($objectData, self::PUT);
     }
 
     /**
@@ -145,11 +156,9 @@ abstract class HttpMapper extends BaseMapper
      * @throws InternalException
      * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
-    public function updatePatch(array $objectData): ArraySerializable
+    public function updatePatch(array $objectData)
     {
-        return $this->sendRequestForEntity(
-            $this->requestFactory->create(self::PATH, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
-        );
+        return $this->updateByHttpMethod($objectData, self::PATH);
     }
 
     /**
@@ -187,11 +196,65 @@ abstract class HttpMapper extends BaseMapper
     }
 
     /**
+     * @param array $objectData
+     * @return ArraySerializable
+     */
+    protected function buildObject(array $objectData) : ArraySerializable
+    {
+        return $this->factory->create($objectData);
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return ArraySerializable
+     *
+     * @throws InternalException
+     * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
+     */
+    protected function createObject(array $data): ArraySerializable
+    {
+        return $this->sendRequestForEntity(
+            $this->requestFactory->create(self::POST, $this->urlRender->prepareCreateUrl($data), [], $data)
+        );
+    }
+
+    /**
+     * updateByHttpMethod use instead its
+     * @see HttpMapper::updateByHttpMethod
+     *
+     * @param array $data
+     *
+     * @return ArraySerializable
+     *
+     * @throws InfrastructureException
+     */
+    protected function updateObject(array $data): ArraySerializable {
+        throw new InfrastructureException('updateByHttpMethod method use instead its');
+    }
+
+    /**
      * @return HttpClient
      */
     protected function getHttpClient()
     {
         return $this->httpClient;
+    }
+
+    /**
+     * @param array $data
+     * @param string $method
+     *
+     * @return ArraySerializable
+     *
+     * @throws InternalException
+     * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
+     */
+    private function updateByHttpMethod(array $data, string $method): ArraySerializable
+    {
+        return $this->sendRequestForEntity(
+            $this->requestFactory->create($method, $this->urlRender->prepareUpdateUrl($data), [], $data)
+        );
     }
 
     /**

@@ -4,7 +4,9 @@ namespace Infrastructure\Mappers;
 
 use Infrastructure\Models\ArraySerializable;
 use Infrastructure\Models\Collection;
+use Infrastructure\Models\CollectionFactory;
 use Infrastructure\Models\PaginationCollection;
+use Infrastructure\Models\PaginationData;
 use Infrastructure\Models\SearchCriteria\SearchCriteria;
 
 abstract class BaseMapper
@@ -59,12 +61,16 @@ abstract class BaseMapper
      * @param $offset
      * @return PaginationCollection
      */
-    final protected function buildPaginationCollection(array $objectsParams, $totalCount, $limit, $offset) : PaginationCollection
+    protected function buildPaginationCollection(array $objectsParams, $totalCount, $limit, $offset) : PaginationCollection
     {
-        $paginationCollection = new PaginationCollection($totalCount, $limit, $offset);
-        $paginationCollection->merge($this->buildCollection($objectsParams));
-
-        return $paginationCollection;
+        return (new CollectionFactory())
+                    ->createWithPaginationFromArray(
+                        $objectsParams,
+                        new PaginationData($totalCount, $limit, $offset),
+                        function (array $objectParam) {
+                            return $this->buildObject($objectParam);
+                        }
+                    );
     }
 
     /**
@@ -73,11 +79,11 @@ abstract class BaseMapper
      */
     protected function buildCollection(array $objectsParams) : Collection
     {
-        $collection = new Collection();
-        foreach ($objectsParams as $objectParams) {
-            $collection->push($this->buildObject($objectParams));
-        }
-
-        return $collection;
+        return (new CollectionFactory())->create(
+                    $objectsParams,
+                    function (array $objectParam) {
+                        return $this->buildObject($objectParam);
+                    }
+                );
     }
 }

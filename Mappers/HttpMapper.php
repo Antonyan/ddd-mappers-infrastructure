@@ -5,11 +5,13 @@ use Infrastructure\Exceptions\InfrastructureException;
 use Infrastructure\Exceptions\InternalException;
 use Infrastructure\Models\ArraySerializable;
 use Infrastructure\Models\Collection;
+use Infrastructure\Models\CollectionFactory;
 use Infrastructure\Models\Http\RequestFactoryInterface;
 use Infrastructure\Models\Http\Headers;
 use Infrastructure\Models\Http\HttpClient;
 use Infrastructure\Models\Http\UrlRender;
 use Infrastructure\Models\PaginationCollection;
+use Infrastructure\Models\PaginationData;
 use Infrastructure\Models\SearchCriteria\SearchCriteria;
 use Psr\Http\Message\RequestInterface;
 
@@ -77,10 +79,11 @@ abstract class HttpMapper extends BaseMapper
             $this->urlRender->prepareLoadUrl([], $params)
         ));
 
-        $paginationCollection = new PaginationCollection(count($result), $filter->limit(), $filter->offset());
-        $paginationCollection->merge($result);
-
-        return $paginationCollection;
+        return (new CollectionFactory())
+                    ->createWithPaginationFromCollection(
+                        $result,
+                        new PaginationData(count($result),$filter->limit(), $filter->offset())
+                    );
     }
 
     /**

@@ -50,4 +50,7 @@ $containerBuilder->register('application', Application::class)
     ])
 ;
 
+
+$containerBuilder->register('RequestFactory', \Infrastructure\Models\Http\GuzzleRequestFactory::class);
+
 return $containerBuilder;

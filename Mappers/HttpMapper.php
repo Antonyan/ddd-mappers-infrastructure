@@ -24,7 +24,7 @@ abstract class HttpMapper extends BaseMapper
     protected const GET = 'GET';
     protected const POST = 'POST';
     protected const PUT = 'PUT';
-    protected const PATH = 'PATH';
+    protected const PATCH = 'PATCH';
     protected const DELETE = 'DELETE';
 
     /**
@@ -130,7 +130,9 @@ abstract class HttpMapper extends BaseMapper
      */
     public function update(array $objectData)
     {
-        return $this->updateByHttpMethod($objectData, self::PUT);
+        return $this->sendRequestForEntity(
+            $this->requestFactory->create(self::PUT, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
+        );
     }
 
     /**
@@ -149,7 +151,6 @@ abstract class HttpMapper extends BaseMapper
         return true;
     }
 
-
     /**
      * @param array $objectData
      * @return Collection|mixed
@@ -158,7 +159,9 @@ abstract class HttpMapper extends BaseMapper
      */
     public function updatePatch(array $objectData)
     {
-        return $this->updateByHttpMethod($objectData, self::PATH);
+        return $this->sendRequestForEntity(
+            $this->requestFactory->create(self::PATCH, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
+        );
     }
 
     /**
@@ -220,17 +223,15 @@ abstract class HttpMapper extends BaseMapper
     }
 
     /**
-     * updateByHttpMethod use instead its
-     * @see HttpMapper::updateByHttpMethod
-     *
      * @param array $data
      *
      * @return ArraySerializable
      *
      * @throws InfrastructureException
      */
-    protected function updateObject(array $data): ArraySerializable {
-        throw new InfrastructureException('updateByHttpMethod method use instead its');
+    protected function updateObject(array $data): ArraySerializable
+    {
+        throw new InfrastructureException('the method is not supported');
     }
 
     /**
@@ -239,22 +240,6 @@ abstract class HttpMapper extends BaseMapper
     protected function getHttpClient()
     {
         return $this->httpClient;
-    }
-
-    /**
-     * @param array $data
-     * @param string $method
-     *
-     * @return ArraySerializable
-     *
-     * @throws InternalException
-     * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
-     */
-    private function updateByHttpMethod(array $data, string $method): ArraySerializable
-    {
-        return $this->sendRequestForEntity(
-            $this->requestFactory->create($method, $this->urlRender->prepareUpdateUrl($data), [], $data)
-        );
     }
 
     /**

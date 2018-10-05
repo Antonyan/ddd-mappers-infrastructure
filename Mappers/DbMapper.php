@@ -249,6 +249,17 @@ abstract class DbMapper extends BaseMapper
     }
 
     /**
+     * @param array $keyValue
+     * @return bool
+     * @throws InfrastructureException
+     */
+    public function deleteBySeveralKeys(array $keyValue) : bool
+    {
+        $this->mySqlClient->delete($this->entityToDataSourceTranslator->table(), $keyValue);
+        return true;
+    }
+
+    /**
      * @param SearchCriteria $filter
      * @throws InfrastructureException
      */

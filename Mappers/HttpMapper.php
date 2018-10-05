@@ -104,7 +104,7 @@ abstract class HttpMapper extends BaseMapper
      * @throws InfrastructureException
      * @throws InternalException
      */
-    public function get($identifiers)
+    public function get(array $identifiers)
     {
         return $this->sendRequestForEntity(
             $this->requestFactory->create(self::GET, $this->urlRender->prepareGetUrl($identifiers))

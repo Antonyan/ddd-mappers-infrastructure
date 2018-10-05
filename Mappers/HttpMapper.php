@@ -11,6 +11,7 @@ use Infrastructure\Models\Http\HttpClient;
 use Infrastructure\Models\Http\UrlRender;
 use Infrastructure\Models\PaginationCollection;
 use Infrastructure\Models\SearchCriteria\SearchCriteria;
+use Infrastructure\Services\BaseFactory;
 use Psr\Http\Message\RequestInterface;
 
 abstract class HttpMapper extends BaseMapper
@@ -23,13 +24,18 @@ abstract class HttpMapper extends BaseMapper
     protected const GET = 'GET';
     protected const POST = 'POST';
     protected const PUT = 'PUT';
-    protected const PATH = 'PATH';
+    protected const PATCH = 'PATCH';
     protected const DELETE = 'DELETE';
 
     /**
      * @var HttpClient
      */
     private $httpClient = null;
+
+    /**
+     * @var BaseFactory
+     */
+    private $factory;
 
     /**
      * @var Headers
@@ -48,15 +54,24 @@ abstract class HttpMapper extends BaseMapper
 
     /**
      * HttpMapper constructor.
+     *
      * @param array $httpMapperConfig
      * @param HttpClient $httpClient
      * @param RequestFactoryInterface $requestFactory
+     * @param BaseFactory $factory
+     *
      * @throws \Infrastructure\Models\Http\IllegalHeaderValueException
      */
-    public function __construct(array $httpMapperConfig, HttpClient $httpClient, RequestFactoryInterface $requestFactory)
+    public function __construct(
+        array $httpMapperConfig,
+        HttpClient $httpClient,
+        RequestFactoryInterface $requestFactory,
+        BaseFactory $factory
+    )
     {
         $this->httpClient = $httpClient;
         $this->requestFactory = $requestFactory;
+        $this->factory = $factory;
 
         $this->defaultHeaders = new Headers($httpMapperConfig[self::DEFAULT_HEADERS] ?? []);
         $this->urlRender = new UrlRender($httpMapperConfig[self::AVAILABLE_URLS]);
@@ -102,11 +117,9 @@ abstract class HttpMapper extends BaseMapper
      * @throws InfrastructureException
      * @throws InternalException
      */
-    public function create(array $objectData): ArraySerializable
+    public function create(array $objectData)
     {
-        return $this->sendRequestForEntity(
-            $this->requestFactory->create(self::POST, $this->urlRender->prepareCreateUrl($objectData), [], $objectData)
-        );
+        return $this->createObject($objectData);
     }
 
     /**
@@ -115,7 +128,7 @@ abstract class HttpMapper extends BaseMapper
      * @throws InternalException
      * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
-    public function update(array $objectData): ArraySerializable
+    public function update(array $objectData)
     {
         return $this->sendRequestForEntity(
             $this->requestFactory->create(self::PUT, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
@@ -138,17 +151,16 @@ abstract class HttpMapper extends BaseMapper
         return true;
     }
 
-
     /**
      * @param array $objectData
      * @return Collection|mixed
      * @throws InternalException
      * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
-    public function updatePatch(array $objectData): ArraySerializable
+    public function updatePatch(array $objectData)
     {
         return $this->sendRequestForEntity(
-            $this->requestFactory->create(self::PATH, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
+            $this->requestFactory->create(self::PATCH, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
         );
     }
 
@@ -184,6 +196,42 @@ abstract class HttpMapper extends BaseMapper
     protected function sendRequestForCollection(RequestInterface $request): Collection
     {
         return $this->buildCollection($this->sendRequest($request)->getParsedBody());
+    }
+
+    /**
+     * @param array $objectData
+     * @return ArraySerializable
+     */
+    protected function buildObject(array $objectData) : ArraySerializable
+    {
+        return $this->factory->create($objectData);
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return ArraySerializable
+     *
+     * @throws InternalException
+     * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
+     */
+    protected function createObject(array $data): ArraySerializable
+    {
+        return $this->sendRequestForEntity(
+            $this->requestFactory->create(self::POST, $this->urlRender->prepareCreateUrl($data), [], $data)
+        );
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return ArraySerializable
+     *
+     * @throws InfrastructureException
+     */
+    protected function updateObject(array $data): ArraySerializable
+    {
+        throw new InfrastructureException('the method is not supported');
     }
 
     /**

@@ -104,7 +104,7 @@ abstract class HttpMapper extends BaseMapper
      * @throws InfrastructureException
      * @throws InternalException
      */
-    public function get(array $identifiers) : ArraySerializable
+    public function get(array $identifiers)
     {
         return $this->sendRequestForEntity(
             $this->requestFactory->create(self::GET, $this->urlRender->prepareGetUrl($identifiers))
@@ -178,7 +178,7 @@ abstract class HttpMapper extends BaseMapper
 
     /**
      * @param RequestInterface $request
-     * @return mixed
+     * @return ArraySerializable
      * @throws InternalException
      * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */

@@ -10,6 +10,6 @@ class JsonResponse extends AbstractResponseDecorator
      */
     public function getParsedBody(): array
     {
-        return json_decode($this->getBody()->getContents());
+        return json_decode($this->getBody()->getContents(), true);
     }
 }

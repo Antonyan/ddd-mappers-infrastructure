@@ -45,12 +45,12 @@ abstract class HttpMapper extends BaseMapper
     /**
      * @var RequestFactoryInterface
      */
-    private $requestFactory;
+    protected $requestFactory;
 
     /**
      * @var UrlRender
      */
-    private $urlRender;
+    protected $urlRender;
 
     /**
      * HttpMapper constructor.
@@ -267,7 +267,7 @@ abstract class HttpMapper extends BaseMapper
         return $this->requestFactory->create(
             $request->getMethod(),
             $request->getUri(),
-            $this->defaultHeaders->merge(new Headers($request->getHeaders())),
+            $this->defaultHeaders->merge(new Headers($request->getHeaders()))->toArray(),
             $request->getBody()
         );
     }

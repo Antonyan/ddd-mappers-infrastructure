@@ -26,6 +26,17 @@ class UrlRender
     }
 
     /**
+     * @param string $key
+     * @param array $data
+     * @param array $params
+     * @return string
+     */
+    public function prepareUrl(string $key, array $data = [], array $params = [])
+    {
+        return $this->buildUrl($this->render($key, $data), $params);
+    }
+
+    /**
      * @param array $data
      * @param array $params
      * @return string

@@ -26,6 +26,17 @@ class UrlRender
     }
 
     /**
+     * @param string $key
+     * @param array $data
+     * @param array $params
+     * @return string
+     */
+    public function prepareUrl(string $key, array $data = [], array $params = [])
+    {
+        return $this->buildUrl($this->render($key, $data), $params);
+    }
+
+    /**
      * @param array $data
      * @param array $params
      * @return string
@@ -104,11 +115,11 @@ class UrlRender
      */
     private function buildUrl(string $url, array $params = [])
     {
+        $url = trim($url, '&?');
         if (!empty($params)) {
-            $separator = strpos($url, '?') === null ? '?' : '&';
-            $url = trim($url, '&') . $separator . http_build_query($params, '&');
+            $separator = strpos($url, '?') === false ? '?' : '&';
+            $url = $url . $separator . http_build_query($params);
         }
-
         return $url;
     }
 }

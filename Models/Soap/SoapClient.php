@@ -1,7 +1,7 @@
 <?php
 namespace Infrastructure\Models\Soap;
 
-class Client extends \SoapClient
+class SoapClient extends \SoapClient
 {
     /**
      * @param string $function_name

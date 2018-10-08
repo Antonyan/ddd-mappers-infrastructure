@@ -1,13 +1,13 @@
 <?php
 namespace Infrastructure\Mappers;
 
-use Infrastructure\Models\Soap\Client;
+use Infrastructure\Models\Soap\SoapClient;
 
 abstract class SoapMapper
 {
     private $soapClient;
 
-    public function __construct(Client $soapClient)
+    public function __construct(SoapClient $soapClient)
     {
         $this->soapClient = $soapClient;
     }

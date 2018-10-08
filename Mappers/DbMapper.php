@@ -89,14 +89,12 @@ abstract class DbMapper extends BaseMapper
             $queryBuilder->generateGroupBy($filter).' '.
             $queryBuilder->generateLimit($filter);
 
-        $collection = $this->buildPaginationCollection(
+        return $this->buildPaginationCollection(
             $this->mySqlClient->fetchAll($query, $whereQueryPart->getBindingValues()),
             $this->getLoadTotalCount(),
             $filter->limit(),
             $filter->offset()
         );
-
-        return $collection;
     }
 
     /**

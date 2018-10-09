@@ -98,6 +98,8 @@ class Application extends HttpKernel
             );
         } catch (Exception $exception) {
             $response = $this->handleException($request, $type, $exception, $catch);
+        } catch (\Error $error) {
+            $response = $this->handleException($request, $type, new Exception($error->getMessage(), $error->getCode(), $error), $catch);
         }
 
         return $response;

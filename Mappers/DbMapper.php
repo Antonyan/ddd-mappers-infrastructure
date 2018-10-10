@@ -2,6 +2,7 @@
 
 namespace Infrastructure\Mappers;
 
+use Infrastructure\Exceptions\EntityNotFoundException;
 use Infrastructure\Exceptions\InfrastructureException;
 use Infrastructure\Exceptions\QueryBuilderEmptyInQueryException;
 use Infrastructure\Models\ArraySerializable;
@@ -175,14 +176,19 @@ abstract class DbMapper extends BaseMapper
      * @param array $data
      * @return ArraySerializable
      * @throws InfrastructureException
+     * @throws EntityNotFoundException
      */
     protected function updateObject(array $data) : ArraySerializable
     {
-        $this->mySqlClient->update(
+        $affectedRows = $this->mySqlClient->update(
             $this->entityToDataSourceTranslator->table(),
             $this->entityToDataSourceTranslator->extractUpdateParams($data),
             $this->entityToDataSourceTranslator->extractUpdateIdentifiers($data)
         );
+
+        if ($affectedRows === 0) {
+            throw new EntityNotFoundException();
+        }
 
         return $this->buildObject($data);
     }
@@ -191,6 +197,7 @@ abstract class DbMapper extends BaseMapper
      * @param array $identifiers
      * @return ArraySerializable
      * @throws InfrastructureException
+     * @throws EntityNotFoundException
      */
     public function get(array $identifiers) : ArraySerializable
     {
@@ -199,7 +206,13 @@ abstract class DbMapper extends BaseMapper
             $conditions[] = new EqualCriteria($indName, $indValue);
         }
 
-        return $this->load(new SearchCriteriaConstructor($conditions, 1))->getFirst();
+        $entity = $this->load(new SearchCriteriaConstructor($conditions, 1))->getFirst();
+
+        if (is_null($entity)) {
+            throw new EntityNotFoundException();
+        }
+
+        return $entity;
     }
 
     /**

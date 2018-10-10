@@ -84,12 +84,13 @@ class MySQLClient
      * @param $table
      * @param $parameters
      * @param $identifier
+     * @return int
      * @throws InfrastructureException
      */
-    public function update($table, $parameters, $identifier) : void
+    public function update($table, $parameters, $identifier) : int
     {
         try {
-            $this->connection()->update($table, $parameters, $identifier);
+            return $this->connection()->update($table, $parameters, $identifier);
         } catch (DBALException $e) {
             throw new InfrastructureException($e->getMessage());
         }

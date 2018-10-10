@@ -180,15 +180,11 @@ abstract class DbMapper extends BaseMapper
      */
     protected function updateObject(array $data) : ArraySerializable
     {
-        $affectedRows = $this->mySqlClient->update(
+        $this->mySqlClient->update(
             $this->entityToDataSourceTranslator->table(),
             $this->entityToDataSourceTranslator->extractUpdateParams($data),
             $this->entityToDataSourceTranslator->extractUpdateIdentifiers($data)
         );
-
-        if ($affectedRows === 0) {
-            throw new EntityNotFoundException();
-        }
 
         return $this->buildObject($data);
     }

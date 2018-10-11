@@ -4,7 +4,7 @@ namespace Infrastructure;
 
 use Exception;
 use Infrastructure\Events\RequestEvent;
-use Infrastructure\Exceptions\HttpResourceNotFoundException;
+use Infrastructure\Exceptions\ResourceNotFoundException as InternalResourceNotFoundException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
@@ -93,7 +93,7 @@ class Application extends HttpKernel
             $response = $this->handleException(
                 $request,
                 $type,
-                new HttpResourceNotFoundException('Resource not found!'),
+                new InternalResourceNotFoundException('Resource not found!'),
                 $catch
             );
         } catch (Exception $exception) {

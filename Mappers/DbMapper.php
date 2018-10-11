@@ -4,6 +4,7 @@ namespace Infrastructure\Mappers;
 
 use Infrastructure\Exceptions\InfrastructureException;
 use Infrastructure\Exceptions\QueryBuilderEmptyInQueryException;
+use Infrastructure\Exceptions\ResourceNotFoundException;
 use Infrastructure\Models\ArraySerializable;
 use Infrastructure\Models\Collection;
 use Infrastructure\Models\EntityToDataSourceTranslator;
@@ -191,6 +192,7 @@ abstract class DbMapper extends BaseMapper
      * @param array $identifiers
      * @return ArraySerializable
      * @throws InfrastructureException
+     * @throws ResourceNotFoundException
      */
     public function get(array $identifiers) : ArraySerializable
     {
@@ -199,7 +201,13 @@ abstract class DbMapper extends BaseMapper
             $conditions[] = new EqualCriteria($indName, $indValue);
         }
 
-        return $this->load(new SearchCriteriaConstructor($conditions, 1))->getFirst();
+        $entities = $this->load(new SearchCriteriaConstructor($conditions, 1));
+
+        if ($entities->count() == 0) {
+            throw new ResourceNotFoundException("Resource not found!");
+        }
+
+        return $entities->getFirst();
     }
 
     /**

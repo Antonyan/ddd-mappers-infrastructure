@@ -4,7 +4,7 @@ namespace Infrastructure\Exceptions;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
-class HttpResourceNotFoundException extends InternalException
+class ResourceNotFoundException extends InternalException
 {
     /**
      * HttpResourceNotFoundException constructor.

@@ -147,11 +147,6 @@ class SearchCriteriaQueryString extends SearchCriteria
                 continue;
             }
 
-            if (strpos($value, ',')) {
-                $this->addInCondition($field, explode(',', $value));
-                continue;
-            }
-
             $this->addEqualCondition($field, $value);
         }
 
@@ -204,7 +199,13 @@ class SearchCriteriaQueryString extends SearchCriteria
             return $this;
         }
 
+        if (strpos($value, ',')) {
+            $this->addInCondition($field, explode(',', $value));
+            return $this;
+        }
+
         $this->conditions[self::WHERE_EQUAL_SIGN][$field] = $value;
+
         return $this;
     }
 

@@ -14,11 +14,24 @@ class RouteCollectionBuilder
     private $routeCollection;
 
     /**
+     * @var string
+     */
+    private $prefix = '';
+
+    /**
      * RouteCollectionBuilder constructor.
      */
     public function __construct()
     {
         $this->routeCollection = new RouteCollection();
+    }
+
+    /**
+     * @param string $prefix
+     */
+    public function addPrefixToUri(string $prefix)
+    {
+        $this->prefix = $prefix;
     }
 
     /**
@@ -104,7 +117,7 @@ class RouteCollectionBuilder
     {
         $this->routeCollection->add($url . $presentationService . $serviceMethod,
             (new RouteBuilder())
-                ->setPath($url)
+                ->setPath($this->prefix . $url)
                 ->setService($presentationService)
                 ->setServiceMethod($serviceMethod)
                 ->setHttpMethod($httpMethod)

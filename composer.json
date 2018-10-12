@@ -30,10 +30,20 @@
         },
         "psr-0": {
             "Infrastructure\\Annotations\\": "Annotations"
-        }
+        },
+        "classmap": [
+            "./"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": { "Infrastructure\\Tests\\": "tests/" }
     },
     "require-dev": {
         "phpunit/phpunit": "6.*"
     },
-    "minimum-stability": "stable"
+    "minimum-stability": "stable",
+
+    "scripts": {
+        "run-tests": ".\\vendor\\bin\\phpunit tests --bootstrap .\\vendor\\autoload.php"
+    }
 }

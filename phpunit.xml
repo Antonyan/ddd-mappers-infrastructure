@@ -1,0 +1,54 @@
+<phpunit
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/6.3/phpunit.xsd"
+        backupGlobals="true"
+        backupStaticAttributes="false"
+        bootstrap="./vendor/autoload.php"
+        cacheTokens="false"
+        colors="true"
+        convertErrorsToExceptions="true"
+        convertNoticesToExceptions="true"
+        convertWarningsToExceptions="true"
+        forceCoversAnnotation="false"
+        mapTestClassNameToCoveredClassName="false"
+        processIsolation="false"
+        stopOnError="false"
+        stopOnFailure="false"
+        stopOnIncomplete="false"
+        stopOnSkipped="false"
+        stopOnRisky="false"
+        timeoutForSmallTests="1"
+        timeoutForMediumTests="10"
+        timeoutForLargeTests="60"
+        verbose="false"
+>
+
+    <testsuites>
+        <testsuite name="Mappers">
+            <directory>tests/Mappers</directory>
+            <file>tests/Mappers/BaseMapperTest.php</file>
+        </testsuite>
+        <testsuite name="Models/Http">
+            <directory>tests/Models/Http</directory>
+
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">Annotations</directory>
+            <directory suffix=".php">Events</directory>
+            <directory suffix=".php">Exceptions</directory>
+            <directory suffix=".php">Listeners</directory>
+            <directory suffix=".php">Mappers</directory>
+            <directory suffix=".php">Models</directory>
+            <directory suffix=".php">Services</directory>
+        </whitelist>
+    </filter>
+
+    <logging>
+        <log type="coverage-html" target="tests/report" lowUpperBound="35"
+             highLowerBound="70"/>
+    </logging>
+
+</phpunit>

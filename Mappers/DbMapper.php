@@ -89,14 +89,12 @@ abstract class DbMapper extends BaseMapper
             $queryBuilder->generateGroupBy($filter).' '.
             $queryBuilder->generateLimit($filter);
 
-        $collection = $this->buildPaginationCollection(
+        return $this->buildPaginationCollection(
             $this->mySqlClient->fetchAll($query, $whereQueryPart->getBindingValues()),
             $this->getLoadTotalCount(),
             $filter->limit(),
             $filter->offset()
         );
-
-        return $collection;
     }
 
     /**
@@ -247,6 +245,17 @@ abstract class DbMapper extends BaseMapper
     public function delete(string $byPropertyName, $propertyValue) : bool
     {
         $this->mySqlClient->delete($this->entityToDataSourceTranslator->table(), [$byPropertyName => $propertyValue]);
+        return true;
+    }
+
+    /**
+     * @param array $keyValue
+     * @return bool
+     * @throws InfrastructureException
+     */
+    public function deleteBySeveralKeys(array $keyValue) : bool
+    {
+        $this->mySqlClient->delete($this->entityToDataSourceTranslator->table(), $keyValue);
         return true;
     }
 

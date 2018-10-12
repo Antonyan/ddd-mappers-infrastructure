@@ -17,7 +17,7 @@ class RequestListener
     {
         $validationRulesReader = new ValidationRulesReader($event->getController(), $event->getMethodName());
         $validator = new Validator($validationRulesReader->rules());
-        $validator->validate(array_merge($event->getRequest()->request->all(), $event->getRequest()->query->all()));
+        $validator->validate(array_merge($event->getRequest()->request->all(), $event->getRequest()->attributes->all()));
 
         $this->filterRequest($event, $validationRulesReader);
 
@@ -50,5 +50,6 @@ class RequestListener
 
         $request->request->replace(array_intersect_key($request->request->all(), array_flip($validationFields)));
         $request->query->replace(array_intersect_key($request->query->all(), array_flip($validationFields)));
+        $request->attributes->replace(array_intersect_key($request->attributes->all(), array_flip($validationFields)));
     }
 }

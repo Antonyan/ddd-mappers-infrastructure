@@ -27,7 +27,7 @@ class ResponseFactory
     {
         $contentType = $response->getHeader('Content-Type')[0] ?? '';
 
-        if (!in_array($contentType, self::$mapper)) {
+        if (!in_array($contentType, array_keys(self::$mapper))) {
             throw new ResponseContentTypeException($contentType);
         }
 

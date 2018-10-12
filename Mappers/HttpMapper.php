@@ -265,7 +265,7 @@ abstract class HttpMapper extends BaseMapper
      * @return RequestInterface
      * @throws \Infrastructure\Models\Http\IllegalHeaderValueException
      */
-    private function mergeDefaultData(RequestInterface $request)
+    protected function mergeDefaultData(RequestInterface $request)
     {
         return $this->requestFactory->create(
             $request->getMethod(),

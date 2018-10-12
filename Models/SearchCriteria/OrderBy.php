@@ -34,13 +34,11 @@ class OrderBy
      */
     private function setOrder(string $order): void
     {
-        $filteredOrder = strtolower($order);
-
-        if (!\in_array($filteredOrder, [SearchCriteria::ORDER_ASCENDING, SearchCriteria::ORDER_DESCENDING], true)){
+        if (!\in_array($order, [SearchCriteria::ORDER_ASCENDING, SearchCriteria::ORDER_DESCENDING], true)){
             throw new InfrastructureException(
                 'Order can be either ' . SearchCriteria::ORDER_ASCENDING . ' or ' . SearchCriteria::ORDER_DESCENDING);
         }
-        $this->order = $filteredOrder;
+        $this->order = $order;
     }
 
     /**

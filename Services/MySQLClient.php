@@ -111,6 +111,16 @@ class MySQLClient
     }
 
     /**
+     * @param \Closure $closure
+     * @throws InfrastructureException
+     * @throws \Throwable
+     */
+    public function transactional(\Closure $closure)
+    {
+        $this->connection()->transactional($closure);
+    }
+
+    /**
      * @return Connection
      * @throws InfrastructureException
      */

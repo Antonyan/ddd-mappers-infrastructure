@@ -55,6 +55,12 @@ abstract class BaseMapper
     abstract protected function updateObject(array $data) : ArraySerializable;
 
     /**
+     * @param \Closure $closure
+     * @return void
+     */
+    abstract public function transactional(\Closure $closure): void;
+
+    /**
      * @param array $objectsParams
      * @param $totalCount
      * @param $limit

@@ -168,6 +168,15 @@ abstract class HttpMapper extends BaseMapper
     }
 
     /**
+     * @param \Closure $closure
+     * @throws InfrastructureException
+     */
+    public function transactional(\Closure $closure): void
+    {
+        throw new InfrastructureException('Not supported');
+    }
+
+    /**
      * @param RequestInterface $request
      * @return \Infrastructure\Models\Http\ResponseInterface
      * @throws InternalException

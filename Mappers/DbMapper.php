@@ -119,6 +119,16 @@ abstract class DbMapper extends BaseMapper
     }
 
     /**
+     * @param \Closure $closure
+     * @throws InfrastructureException
+     * @throws \Throwable
+     */
+    public function transactional(\Closure $closure): void
+    {
+        $this->mySqlClient->transactional($closure);
+    }
+
+    /**
      * @return array
      */
     protected function getAsColumns() : array

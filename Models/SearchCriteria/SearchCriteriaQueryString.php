@@ -141,8 +141,9 @@ class SearchCriteriaQueryString extends SearchCriteria
                 continue;
             }
 
-            if (strpos($value, ',')) {
-                $this->addInCondition($field, explode(',', $value));
+            if (is_array($value)) {
+                $queryParameter = key($value);
+                $this->conversionMap()[$queryParameter]($value);
                 continue;
             }
 
@@ -162,8 +163,7 @@ class SearchCriteriaQueryString extends SearchCriteria
         return [
             self::LIMIT => function($value) { $this->limit = $this->limit <= self::MAX_LIMIT ? $value : self::MAX_LIMIT;},
             self::OFFSET => function($value) { $this->offset = $value;},
-            self::ORDER_ASCENDING => function($value) { $this->addOrderByAscending($value);},
-            self::ORDER_DESCENDING => function($value) { $this->addOrderByDescending($value);},
+
             self::WHERE_LIKE => function($value) {
                 foreach ($value as $innerField => $innerValue) {
                     $this->addLikeCondition($innerField, $innerValue);}
@@ -177,13 +177,35 @@ class SearchCriteriaQueryString extends SearchCriteria
     }
 
     /**
+     * @return array
+     */
+    private function orderConditionsMap() : array
+    {
+        return [
+            self::ORDER_ASCENDING => function($value) { $this->addOrderByAscending($value);},
+            self::ORDER_DESCENDING => function($value) { $this->addOrderByDescending($value);},
+        ];
+    }
+
+    /**
      * @param $field
      * @param $value
      * @return SearchCriteria
      */
     private function addEqualCondition($field, $value) : SearchCriteria
     {
+        if (array_key_exists($field, $this->orderConditionsMap())){
+            $this->orderConditionsMap()[$field]($value);
+            return $this;
+        }
+
+        if (strpos($value, ',')) {
+            $this->addInCondition($field, explode(',', $value));
+            return $this;
+        }
+
         $this->conditions[self::WHERE_EQUAL_SIGN][$field] = $value;
+
         return $this;
     }
 

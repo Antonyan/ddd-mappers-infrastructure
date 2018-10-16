@@ -9,6 +9,9 @@ use Infrastructure\Models\Validator;
 
 class RequestListener
 {
+    private const PIPE = '|';
+    private const EQUAL_RULE = 'eq';
+
     /**
      * @param RequestEvent $event
      * @throws Exception
@@ -21,22 +24,7 @@ class RequestListener
 
         $this->filterRequest($event, $validationRulesReader);
 
-        //query string preprocessor
-
-        $queryData = $event->getRequest()->query->all();
-        $processedQueryData = [];
-
-        foreach ($queryData as $parameterName => $parameterValue) {
-            $processedQueryParameter = trim($parameterValue, '()');
-
-            if (strpos($processedQueryParameter, '|')){
-                $processedQueryParameter = explode('|', $processedQueryParameter);
-            }
-
-            $processedQueryData[$parameterName] = $processedQueryParameter;
-        }
-
-        $event->getRequest()->query->replace($processedQueryData);
+        $event->getRequest()->query->replace($this->extractConditions($event->getRequest()->query->all()));
     }
 
     /**
@@ -51,5 +39,26 @@ class RequestListener
         $request->request->replace(array_intersect_key($request->request->all(), array_flip($validationFields)));
         $request->query->replace(array_intersect_key($request->query->all(), array_flip($validationFields)));
         $request->attributes->replace(array_intersect_key($request->attributes->all(), array_flip($validationFields)));
+    }
+
+    /**
+     * @param $query
+     * @return array
+     */
+    private function extractConditions($query): array
+    {
+        $data = [];
+
+        foreach ($query as $field => $parameter) {
+            if (strpos($parameter, self::PIPE)) {
+                list($rule, $value) = explode(self::PIPE, $parameter);
+                $data[trim($rule, "(")][trim($field)] = trim($value, ")");
+                continue;
+            }
+
+            $data[self::EQUAL_RULE][$field] = trim($parameter);
+        }
+        
+        return $data;
     }
 }

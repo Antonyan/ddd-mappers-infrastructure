@@ -161,9 +161,6 @@ class SearchCriteriaQueryString extends SearchCriteria
     private function conversionMap() : array
     {
         return [
-            self::LIMIT => function($value) { $this->limit = $this->limit <= self::MAX_LIMIT ? $value : self::MAX_LIMIT;},
-            self::OFFSET => function($value) { $this->offset = $value;},
-
             self::WHERE_LIKE => function($value) {
                 foreach ($value as $innerField => $innerValue) {
                     $this->addLikeCondition($innerField, $innerValue);}
@@ -179,9 +176,11 @@ class SearchCriteriaQueryString extends SearchCriteria
     /**
      * @return array
      */
-    private function orderConditionsMap() : array
+    private function equalConditionsMap() : array
     {
         return [
+            self::LIMIT => function($value) { $this->limit = $this->limit <= self::MAX_LIMIT ? $value : self::MAX_LIMIT;},
+            self::OFFSET => function($value) { $this->offset = $value;},
             self::ORDER_ASCENDING => function($value) { $this->addOrderByAscending($value);},
             self::ORDER_DESCENDING => function($value) { $this->addOrderByDescending($value);},
         ];
@@ -194,8 +193,8 @@ class SearchCriteriaQueryString extends SearchCriteria
      */
     private function addEqualCondition($field, $value) : SearchCriteria
     {
-        if (array_key_exists($field, $this->orderConditionsMap())){
-            $this->orderConditionsMap()[$field]($value);
+        if (array_key_exists($field, $this->equalConditionsMap())){
+            $this->equalConditionsMap()[$field]($value);
             return $this;
         }
 

@@ -21,19 +21,19 @@ class SearchCriteriaQueryStringTest extends TestCase
     }
     public function testOrderByASC()
     {
-        $this->assertArraySubset((new SearchCriteriaQueryString(['orderByASC' => 'name']))->orderBy(), ['=' => ['name' => 'asc']]);
+        $this->assertArraySubset((new SearchCriteriaQueryString(['eq' => ['orderByASC' => 'name']]))->orderBy(), ['=' => ['name' => 'asc']]);
     }
     public function testOrderByDESC()
     {
-        $this->assertArraySubset((new SearchCriteriaQueryString(['orderByDESC' => 'name']))->orderBy(), ['=' => ['name' => 'desc']]);
+        $this->assertArraySubset((new SearchCriteriaQueryString(['eq' => ['orderByDESC' => 'name']]))->orderBy(), ['=' => ['name' => 'desc']]);
     }
     public function testLimit()
     {
-        $this->assertEquals((new SearchCriteriaQueryString(['limit' => 1]))->limit(), 1);
+        $this->assertEquals((new SearchCriteriaQueryString(['eq' => ['limit' => 1]]))->limit(), 1);
     }
     public function testOffset()
     {
-        $this->assertEquals((new SearchCriteriaQueryString(['offset' => 1]))->offset(), 1);
+        $this->assertEquals((new SearchCriteriaQueryString(['eq' => ['offset' => 1]]))->offset(), 1);
     }
     public function testLike()
     {

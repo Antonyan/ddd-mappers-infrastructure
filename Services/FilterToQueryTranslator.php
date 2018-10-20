@@ -181,7 +181,7 @@ class FilterToQueryTranslator
             $whereInConditions[] = $this->getFieldNameByCompassFilterType($field, $filter).' IN ('.implode(', ', $fieldVariants).')';
         }
 
-        return new DbQueryPart(implode(' AND ', $whereInConditions), $bindPlaceholders);
+        return new DbQueryPart(implode($filter->combiningConditions(), $whereInConditions), $bindPlaceholders);
     }
 
     /**

@@ -30,13 +30,22 @@ class SearchCriteriaConstructor extends SearchCriteria
      * @param int $limit
      * @param int $offset
      * @param OrderBy $orderBy
+     * @param string $combiningConditions
+     * @throws \Infrastructure\Exceptions\InfrastructureException
      */
-    public function __construct(array $conditions, int $limit = self::MAX_LIMIT, int $offset = 0, OrderBy $orderBy = null)
+    public function __construct(
+        array $conditions,
+        int $limit = self::MAX_LIMIT,
+        int $offset = 0,
+        OrderBy $orderBy = null,
+        string $combiningConditions = self::COMBINING_CONDITIONS_VIA_AND
+    )
     {
         $this->conditions = $conditions;
         $this->limit = $limit;
         $this->offset = $offset;
         $this->orderBy = $orderBy;
+        $this->setCombiningConditions($combiningConditions);
     }
 
     /**

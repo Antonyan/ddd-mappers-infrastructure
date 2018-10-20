@@ -80,7 +80,7 @@ class FilterToQueryTranslator
             }
         }
 
-        return new DbQueryPart($whereConditions ? ' WHERE ' . implode(' AND ', $whereConditions) : '', $bindPlaceholders);
+        return new DbQueryPart($whereConditions ? ' WHERE ' . implode($filter->combiningConditions(), $whereConditions) : '', $bindPlaceholders);
     }
 
     /**

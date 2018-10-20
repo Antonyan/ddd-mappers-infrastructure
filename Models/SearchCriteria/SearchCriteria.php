@@ -2,9 +2,13 @@
 
 namespace Infrastructure\Models\SearchCriteria;
 
+use Infrastructure\Exceptions\InfrastructureException;
+
 abstract class SearchCriteria
 {
     public const CONDITIONS = 'conditions';
+    public const COMBINING_CONDITIONS_VIA_AND = ' AND ';
+    public const COMBINING_CONDITIONS_VIA_OR = ' OR ';
     public const LIMIT = 'limit';
     public const OFFSET = 'offset';
     public const ORDER_BY = 'orderBy';
@@ -36,6 +40,11 @@ abstract class SearchCriteria
 
     public const MAX_LIMIT = 100;
 
+    /**
+     * @var string
+     */
+    private $combiningConditions = self::COMBINING_CONDITIONS_VIA_AND;
+
     abstract public function limit() : int;
 
     abstract public function offset() : int;
@@ -43,4 +52,28 @@ abstract class SearchCriteria
     abstract public function orderBy() : array;
 
     abstract public function conditions() : array;
+
+    /**
+     * @return string
+     */
+    public function combiningConditions(): string
+    {
+        return $this->combiningConditions;
+    }
+
+    /**
+     * @param string $combiningConditions
+     * @throws InfrastructureException
+     */
+    protected function setCombiningConditions(string $combiningConditions): void
+    {
+        $allowedCombinings = [self::COMBINING_CONDITIONS_VIA_AND, self::COMBINING_CONDITIONS_VIA_OR];
+        if (!in_array($combiningConditions, $allowedCombinings)) {
+            throw new InfrastructureException(
+                'Illegal combining conditions(\'' . $combiningConditions . '\'), allowed: ' . implode(', ', $allowedCombinings)
+            );
+        }
+
+        $this->combiningConditions = $combiningConditions;
+    }
 }

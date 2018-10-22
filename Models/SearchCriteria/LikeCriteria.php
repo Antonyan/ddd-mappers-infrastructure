@@ -17,6 +17,7 @@ class LikeCriteria implements Condition
 
     /**
      * EqualCriteria constructor.
+     *
      * @param string $key
      * @param string $value
      */

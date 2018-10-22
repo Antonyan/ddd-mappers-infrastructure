@@ -80,7 +80,7 @@ class FilterToQueryTranslator
             }
         }
 
-        return new DbQueryPart($whereConditions ? ' WHERE ' . implode($filter->combiningConditions(), $whereConditions) : '', $bindPlaceholders);
+        return new DbQueryPart($whereConditions ? ' WHERE ' . implode(' AND ', $whereConditions) : '', $bindPlaceholders);
     }
 
     /**
@@ -181,7 +181,7 @@ class FilterToQueryTranslator
             $whereInConditions[] = $this->getFieldNameByCompassFilterType($field, $filter).' IN ('.implode(', ', $fieldVariants).')';
         }
 
-        return new DbQueryPart(implode($filter->combiningConditions(), $whereInConditions), $bindPlaceholders);
+        return new DbQueryPart(implode(' AND ', $whereInConditions), $bindPlaceholders);
     }
 
     /**

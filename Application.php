@@ -86,7 +86,10 @@ class Application extends HttpKernel
             $controller = $this->controllerResolver->getController($request);
             $arguments = $this->argumentResolver->getArguments($request, $controller);
 
-            $this->eventDispatcher->dispatch('request', new RequestEvent($request, $controller[0], $controller[1]));
+            //TODO: create appropriate error handler
+            if($type == HttpKernelInterface::MASTER_REQUEST) {
+                $this->eventDispatcher->dispatch('request', new RequestEvent($request, $controller[0], $controller[1]));
+            }
 
             $response = call_user_func_array($controller, $arguments);
         } catch (ResourceNotFoundException $exception) {

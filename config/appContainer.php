@@ -33,12 +33,14 @@ $containerBuilder->register('listener.exception', ExceptionListener::class)
 ;
 
 $containerBuilder->register('listener.request', \Infrastructure\Listeners\RequestListener::class);
+$containerBuilder->register('listener.auth', \Infrastructure\Listeners\AuthListener::class);
 
 $containerBuilder->register('dispatcher', EventDispatcher::class)
     ->addMethodCall('addSubscriber', [new Reference('listener.router')])
     ->addMethodCall('addSubscriber', [new Reference('listener.response')])
     ->addMethodCall('addSubscriber', [new Reference('listener.exception')])
     ->addMethodCall('addListener', ['request', [new Reference('listener.request'), 'onRequest']])
+    ->addMethodCall('addListener', ['request', [new Reference('listener.auth'), 'onRequest']])
 ;
 
 $containerBuilder->register('application', Application::class)

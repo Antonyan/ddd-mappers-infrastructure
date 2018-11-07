@@ -14,6 +14,6 @@ class InfrastructureException extends InternalException
      */
     public function __construct($message, Throwable $previous = null)
     {
-        parent::__construct($message, Response::HTTP_INTERNAL_SERVER_ERROR, [], $previous);
+        parent::__construct($message, Response::HTTP_INTERNAL_SERVER_ERROR, self::DEFAULT_ERROR_CODE, [], [], $previous);
     }
 }

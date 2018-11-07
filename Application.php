@@ -47,11 +47,13 @@ class Application extends HttpKernel
     /**
      * Application constructor.
      * @param RouteCollection $routes
+     * @param ContainerBuilder $appContainer
      * @throws Exception
      */
-    public function __construct(RouteCollection $routes) {
+    public function __construct(RouteCollection $routes, ContainerBuilder $appContainer) {
         /** @var ContainerBuilder $container */
         $container = include __DIR__.'/config/appContainer.php';
+        $container->merge($appContainer);
         $this->matcher = $container->get('matcher');
         $this->controllerResolver = $container->get('controllerResolver');
         $this->argumentResolver = $container->get('argumentResolver');

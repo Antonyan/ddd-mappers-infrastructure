@@ -6,12 +6,20 @@ use Symfony\Component\HttpFoundation\Response;
 class ClientErrorException extends InternalException
 {
     /**
-     * ValidationException constructor.
+     * ClientErrorException constructor.
      * @param string $message
-     * @param int $code
+     * @param int $statusCode
+     * @param int $errorCode
+     * @param array $body
      */
-    public function __construct(string $message, $code = Response::HTTP_BAD_REQUEST)
+    public function __construct(string $message, $statusCode = Response::HTTP_BAD_REQUEST, $errorCode = self::DEFAULT_ERROR_CODE, $body = [])
     {
-        parent::__construct(json_encode(['error' => $message]), $code);
+        parent::__construct(
+            $message,
+            $statusCode,
+            $errorCode,
+            [],
+            $body
+        );
     }
 }

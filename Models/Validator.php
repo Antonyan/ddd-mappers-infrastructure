@@ -29,9 +29,6 @@ class Validator
     /**
      * @param array $dataForValidation
      * @throws ValidationException
-     * @throws AnnotationException
-     * @throws InfrastructureException
-     * @throws ReflectionException
      */
     public function validate(array $dataForValidation) : void
     {
@@ -58,7 +55,7 @@ class Validator
 
 
         if (\count($errors)){
-            throw new ValidationException($errors);
+            throw new ValidationException('Invalid request parameters', $errors);
         }
     }
 }

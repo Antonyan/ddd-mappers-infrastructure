@@ -7,10 +7,12 @@ class ValidationException extends InternalException
 {
     /**
      * ValidationException constructor.
-     * @param array $message
+     * @param string $message
+     * @param int $errorCode
+     * @param array $body
      */
-    public function __construct(array $message)
+    public function __construct(string $message, array $body = [], int $errorCode = self::VALIDATION_ERROR_CODE)
     {
-        parent::__construct(json_encode($message), Response::HTTP_BAD_REQUEST);
+        parent::__construct($message, Response::HTTP_BAD_REQUEST, $errorCode, [], $body);
     }
 }

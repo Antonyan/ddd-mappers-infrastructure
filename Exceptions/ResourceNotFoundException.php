@@ -8,11 +8,13 @@ class ResourceNotFoundException extends InternalException
 {
     /**
      * HttpResourceNotFoundException constructor.
-     * @param string $message
-     * @param null|Throwable $previous
+     * @param $message
+     * @param Throwable|null $previous
+     * @param int $errorCode
+     * @param array $body
      */
-    public function __construct($message, Throwable $previous = null)
+    public function __construct($message, $errorCode = self::DEFAULT_ERROR_CODE, $body = [], Throwable $previous = null)
     {
-        parent::__construct($message, Response::HTTP_NOT_FOUND, [], $previous);
+        parent::__construct($message, Response::HTTP_NOT_FOUND, [], $body, $errorCode, $previous);
     }
 }

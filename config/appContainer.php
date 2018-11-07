@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\EventListener\ResponseListener;
 use Symfony\Component\HttpKernel\EventListener\RouterListener;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\HttpKernel\EventListener\ExceptionListener;
+use Infrastructure\Listeners\ExceptionListener;
 
 $containerBuilder = new ContainerBuilder();
 $containerBuilder->register('context', RequestContext::class);
@@ -29,7 +29,13 @@ $containerBuilder->register('listener.response', ResponseListener::class)
     ->setArguments(['UTF-8'])
 ;
 $containerBuilder->register('listener.exception', ExceptionListener::class)
-    ->setArguments(['App\Services\Error::handle'])
+    ->setArguments([
+        ($containerBuilder->has('application.error.handler') ?
+            $containerBuilder->get('application.error.handler') :
+            new \Infrastructure\Services\ErrorHandlerHandler()
+        )
+
+    ])
 ;
 
 $containerBuilder->register('listener.request', \Infrastructure\Listeners\RequestListener::class);

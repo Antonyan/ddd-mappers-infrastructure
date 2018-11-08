@@ -28,13 +28,11 @@ $containerBuilder->register('listener.router', RouterListener::class)
 $containerBuilder->register('listener.response', ResponseListener::class)
     ->setArguments(['UTF-8'])
 ;
+$containerBuilder->register('application.error.handler', \Infrastructure\Services\ErrorHandlerHandler::class);
+
 $containerBuilder->register('listener.exception', ExceptionListener::class)
     ->setArguments([
-        ($containerBuilder->has('application.error.handler') ?
-            $containerBuilder->get('application.error.handler') :
-            new \Infrastructure\Services\ErrorHandlerHandler()
-        )
-
+        new Reference('application.error.handler')
     ])
 ;
 

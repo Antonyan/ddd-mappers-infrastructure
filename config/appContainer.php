@@ -1,7 +1,8 @@
 <?php
 
 use Infrastructure\Application;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
+
+use Infrastructure\Models\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -14,6 +15,9 @@ use Symfony\Component\Routing\RequestContext;
 use Infrastructure\Listeners\ExceptionListener;
 
 $containerBuilder = new ContainerBuilder();
+
+$containerBuilder->addCompilerPass(new \Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass('dispatcher'));
+
 $containerBuilder->register('context', RequestContext::class);
 $containerBuilder->register('matcher', UrlMatcher::class)
     ->setArguments([$routes, new Reference('context')])

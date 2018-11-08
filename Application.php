@@ -5,7 +5,8 @@ namespace Infrastructure;
 use Exception;
 use Infrastructure\Events\RequestEvent;
 use Infrastructure\Exceptions\ResourceNotFoundException as InternalResourceNotFoundException;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
+
+use Infrastructure\Models\ContainerBuilder;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -54,6 +55,7 @@ class Application extends HttpKernel
         /** @var ContainerBuilder $container */
         $container = include __DIR__.'/config/appContainer.php';
         $container->merge($appContainer);
+        $container->compile();
         $this->matcher = $container->get('matcher');
         $this->controllerResolver = $container->get('controllerResolver');
         $this->argumentResolver = $container->get('argumentResolver');

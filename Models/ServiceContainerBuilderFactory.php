@@ -2,13 +2,14 @@
 namespace Infrastructure\Models;
 
 use Infrastructure\Services\BaseService;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class ServiceContainerBuilderFactory
 {
     /**
      * @param $service
      * @return ContainerBuilder
+     * @throws \Infrastructure\Exceptions\InfrastructureException
+     * @throws \ReflectionException
      */
     public function create($service)
     {

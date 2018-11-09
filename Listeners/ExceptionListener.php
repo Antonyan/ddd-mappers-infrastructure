@@ -15,6 +15,9 @@ class ExceptionListener implements EventSubscriberInterface
     protected $debug;
     protected $errorHandler;
 
+    private const LOG_PRIORITY = 0;
+    private const HANDLE_EXCEPTION_PRIORITY = -128;
+
     /**
      * ExceptionListener constructor.
      * @param $errorHandler
@@ -35,8 +38,8 @@ class ExceptionListener implements EventSubscriberInterface
     {
         return array(
             KernelEvents::EXCEPTION => array(
-                array('logKernelException', 0),
-                array('onKernelException', -128),
+                array('logKernelException', self::LOG_PRIORITY),
+                array('onKernelException', self::HANDLE_EXCEPTION_PRIORITY),
             ),
         );
     }
@@ -82,21 +85,31 @@ class ExceptionListener implements EventSubscriberInterface
         } catch (\Exception $e) {
             $this->logException($e, sprintf('Exception thrown when handling an exception (%s: %s at %s line %s)', \get_class($e), $e->getMessage(), $e->getFile(), $e->getLine()));
 
-            $wrapper = $e;
-
-            while ($prev = $wrapper->getPrevious()) {
-                if ($exception === $wrapper = $prev) {
-                    throw $e;
-                }
-            }
-
-            $prev = new \ReflectionProperty($wrapper instanceof \Exception ? \Exception::class : \Error::class, 'previous');
-            $prev->setAccessible(true);
-            $prev->setValue($wrapper, $exception);
-
-            throw $e;
+            $this->throwDeepestHandlerExceptionWithAttachedOriginalException($exception, $e);
         }
 
         $event->setResponse($response);
+    }
+
+    /**
+     * @param \Exception $originalException
+     * @param \Exception $handlerFailException
+     * @throws \ReflectionException
+     */
+    private function throwDeepestHandlerExceptionWithAttachedOriginalException(\Exception $originalException, \Exception $handlerFailException)
+    {
+        $wrapper = $handlerFailException;
+
+        while ($prev = $wrapper->getPrevious()) {
+            if ($originalException === $wrapper = $prev) {
+                throw $handlerFailException;
+            }
+        }
+
+        $prev = new \ReflectionProperty($wrapper instanceof \Exception ? \Exception::class : \Error::class, 'previous');
+        $prev->setAccessible(true);
+        $prev->setValue($wrapper, $originalException);
+
+        throw $handlerFailException;
     }
 }

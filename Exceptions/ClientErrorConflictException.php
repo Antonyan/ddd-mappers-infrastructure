@@ -16,9 +16,8 @@ class ClientErrorConflictException extends ClientErrorException
         parent::__construct(
             $message,
             Response::HTTP_CONFLICT,
-            $errorCode,
-            [],
-            $data
+            $data,
+            $errorCode
         );
     }
 }

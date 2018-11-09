@@ -15,6 +15,6 @@ class ResourceNotFoundException extends InternalException
      */
     public function __construct($message, $data = [], $errorCode = self::DEFAULT_ERROR_CODE, Throwable $previous = null)
     {
-        parent::__construct($message, Response::HTTP_NOT_FOUND, [], $data, $errorCode, $previous);
+        parent::__construct($message, Response::HTTP_NOT_FOUND, $errorCode, [], $data, $previous);
     }
 }

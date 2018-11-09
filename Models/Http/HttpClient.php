@@ -6,6 +6,7 @@ namespace Infrastructure\Models\Http;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
+use Infrastructure\Exceptions\HttpExceptionInterface;
 use Infrastructure\Exceptions\InfrastructureException;
 use Infrastructure\Exceptions\InternalException;
 use Infrastructure\Models\Http\Response\ResponseFactory;
@@ -45,7 +46,9 @@ class HttpClient
             throw new InternalException(
                 $response->getBody()->getContents(),
                 $response->getStatusCode(),
+                HttpExceptionInterface::DEFAULT_ERROR_CODE,
                 $response->getHeaders(),
+                [],
                 $exception,
                 $exception->getCode()
             );

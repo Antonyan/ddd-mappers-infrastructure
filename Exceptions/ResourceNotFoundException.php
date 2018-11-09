@@ -7,12 +7,14 @@ use Throwable;
 class ResourceNotFoundException extends InternalException
 {
     /**
-     * HttpResourceNotFoundException constructor.
-     * @param string $message
-     * @param null|Throwable $previous
+     * ResourceNotFoundException constructor.
+     * @param $message
+     * @param array $data
+     * @param int $errorCode
+     * @param Throwable|null $previous
      */
-    public function __construct($message, Throwable $previous = null)
+    public function __construct($message, $data = [], $errorCode = self::DEFAULT_ERROR_CODE, Throwable $previous = null)
     {
-        parent::__construct($message, Response::HTTP_NOT_FOUND, [], $previous);
+        parent::__construct($message, Response::HTTP_NOT_FOUND, [], $data, $errorCode, $previous);
     }
 }

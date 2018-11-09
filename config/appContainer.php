@@ -1,7 +1,8 @@
 <?php
 
 use Infrastructure\Application;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
+
+use Infrastructure\Models\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -11,9 +12,12 @@ use Symfony\Component\HttpKernel\EventListener\ResponseListener;
 use Symfony\Component\HttpKernel\EventListener\RouterListener;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\HttpKernel\EventListener\ExceptionListener;
+use Infrastructure\Listeners\ExceptionListener;
 
 $containerBuilder = new ContainerBuilder();
+
+$containerBuilder->addCompilerPass(new \Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass('dispatcher'));
+
 $containerBuilder->register('context', RequestContext::class);
 $containerBuilder->register('matcher', UrlMatcher::class)
     ->setArguments([$routes, new Reference('context')])
@@ -28,8 +32,12 @@ $containerBuilder->register('listener.router', RouterListener::class)
 $containerBuilder->register('listener.response', ResponseListener::class)
     ->setArguments(['UTF-8'])
 ;
+$containerBuilder->register('application.error.handler', \Infrastructure\Services\ErrorHandlerHandler::class);
+
 $containerBuilder->register('listener.exception', ExceptionListener::class)
-    ->setArguments(['App\Services\Error::handle'])
+    ->setArguments([
+        new Reference('application.error.handler')
+    ])
 ;
 
 $containerBuilder->register('listener.request', \Infrastructure\Listeners\RequestListener::class);

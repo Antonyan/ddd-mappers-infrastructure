@@ -2,7 +2,6 @@
 
 namespace Infrastructure\Exceptions;
 
-use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
 class InternalException extends \Exception implements HttpExceptionInterface
@@ -18,17 +17,31 @@ class InternalException extends \Exception implements HttpExceptionInterface
     protected $statusCode;
 
     /**
-     * BaseInternalException constructor.
+     * @var array
+     */
+    protected $body;
+
+    /**
+     * @var int
+     */
+    protected $errorCode;
+
+    /**
+     * InternalException constructor.
      * @param string $message
-     * @param int $statusCode
+     * @param $statusCode
+     * @param int $errorCode
      * @param array $headers
-     * @param null|Throwable $previous
+     * @param array $body
+     * @param Throwable|null $previous
      * @param int $code
      */
-    public function __construct($message = '', $statusCode, $headers = [], Throwable $previous = null, $code = 0)
+    public function __construct($message = '', $statusCode, $errorCode = self::DEFAULT_ERROR_CODE, $headers = [], $body = [],  Throwable $previous = null, $code = 0)
     {
         $this->statusCode = $statusCode;
         $this->headers = $headers;
+        $this->body = $body;
+        $this->errorCode = $errorCode;
         parent::__construct($message, $code, $previous);
     }
 
@@ -47,4 +60,22 @@ class InternalException extends \Exception implements HttpExceptionInterface
     {
         return $this->headers;
     }
+
+    /**
+     * @return array
+     */
+    public function getBody(): array
+    {
+        return $this->body;
+    }
+
+    /**
+     * @return int
+     */
+    public function getErrorCode(): int
+    {
+        return $this->errorCode;
+    }
+
+
 }

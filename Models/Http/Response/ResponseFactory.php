@@ -9,16 +9,6 @@ use \Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 class ResponseFactory
 {
     /**
-     * @var array
-     */
-    private static $mapper = [
-        /** @see ResponseFactory::createJsonResponse() */
-        ResponseInterface::CONTENT_TYPE_JSON => [ResponseFactory::class, 'createJsonResponse'],
-        /** @see ResponseFactory::createXmlResponse() */
-        ResponseInterface::CONTENT_TYPE_XML => [ResponseFactory::class, 'createXmlResponse'],
-    ];
-
-    /**
      * @param PsrResponseInterface $response
      * @return ResponseInterface
      * @throws ResponseContentTypeException
@@ -27,11 +17,34 @@ class ResponseFactory
     {
         $contentType = $response->getHeader('Content-Type')[0] ?? '';
 
-        if (!in_array($contentType, array_keys(self::$mapper))) {
-            throw new ResponseContentTypeException($contentType);
+        foreach ($this->getContentTypeResponseMap($response) as $allowedContentType => $creatorResponse) {
+            if ($this->isAllowedContentType($contentType, $allowedContentType)) {
+                return $creatorResponse($response);
+            }
         }
 
-        return call_user_func(self::$mapper[$contentType], $response);
+        throw new ResponseContentTypeException($contentType);
+    }
+
+    /**
+     * @param PsrResponseInterface $response
+     * @return array
+     */
+    private function getContentTypeResponseMap(PsrResponseInterface $response)
+    {
+        return [
+            ResponseInterface::CONTENT_TYPE_JSON => function() use($response) {
+                return $this->createJsonResponse($response);
+            },
+            ResponseInterface::CONTENT_TYPE_XML => function() use($response) {
+                return $this->createXmlResponse($response);
+            },
+        ];
+    }
+
+    private function isAllowedContentType(string $contentType, $allowedContentType): bool
+    {
+        return strpos($allowedContentType, $contentType) !== false;
     }
 
     /**

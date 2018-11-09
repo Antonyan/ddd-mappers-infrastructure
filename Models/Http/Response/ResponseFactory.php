@@ -17,9 +17,9 @@ class ResponseFactory
     {
         $contentType = $response->getHeader('Content-Type')[0] ?? '';
 
-        foreach ($this->getContentTypeResponseMap($response) as $allowedContentType => $mapper ) {
-            if ($this->isTheSameContentType($contentType, $allowedContentType)) {
-                return $mapper($response);
+        foreach ($this->getContentTypeResponseMap($response) as $allowedContentType => $creatorResponse) {
+            if ($this->isAllowedContentType($contentType, $allowedContentType)) {
+                return $creatorResponse($response);
             }
         }
 
@@ -42,7 +42,7 @@ class ResponseFactory
         ];
     }
 
-    private function isTheSameContentType(string $contentType, $allowedContentType): bool
+    private function isAllowedContentType(string $contentType, $allowedContentType): bool
     {
         return strpos($allowedContentType, $contentType) !== false;
     }

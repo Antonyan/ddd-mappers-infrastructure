@@ -105,7 +105,7 @@ abstract class DbMapper extends BaseMapper
      */
     public function create(array $objectData)
     {
-        return $this->createObject($objectData);
+        return $this->createObject($this->buildObject($objectData)->toArray());
     }
 
     /**
@@ -115,7 +115,7 @@ abstract class DbMapper extends BaseMapper
      */
     public function update(array $objectData)
     {
-        return $this->updateObject($objectData);
+        return $this->updateObject($this->buildObject($objectData)->toArray());
     }
 
     /**
@@ -163,7 +163,7 @@ abstract class DbMapper extends BaseMapper
         $parametersForInsert = [];
 
         foreach ($parametersForCreate as $entityParams) {
-            $parametersForInsert[] = $this->entityToDataSourceTranslator->translatePropertyInColumn($entityParams);
+            $parametersForInsert[] = $this->entityToDataSourceTranslator->translatePropertyInColumn($this->buildObject($entityParams)->toArray());
         }
 
         $this->mySqlClient->batchSave(

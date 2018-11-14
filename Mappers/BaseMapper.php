@@ -43,16 +43,16 @@ abstract class BaseMapper
     abstract public function delete(string $byPropertyName, $propertyValue) : bool;
 
     /**
-     * @param array $data
+     * @param ArraySerializable $object
      * @return ArraySerializable
      */
-    abstract protected function createObject(array $data) : ArraySerializable;
+    abstract protected function createObject(ArraySerializable $object) : ArraySerializable;
 
     /**
-     * @param array $data
+     * @param ArraySerializable $object
      * @return ArraySerializable
      */
-    abstract protected function updateObject(array $data) : ArraySerializable;
+    abstract protected function updateObject(ArraySerializable $object) : ArraySerializable;
 
     /**
      * @param array $objectsParams

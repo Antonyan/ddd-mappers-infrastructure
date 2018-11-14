@@ -105,7 +105,7 @@ abstract class DbMapper extends BaseMapper
      */
     public function create(array $objectData)
     {
-        return $this->createObject($objectData);
+        return $this->createObject($this->buildObject($objectData));
     }
 
     /**
@@ -115,7 +115,7 @@ abstract class DbMapper extends BaseMapper
      */
     public function update(array $objectData)
     {
-        return $this->updateObject($objectData);
+        return $this->updateObject($this->buildObject($objectData));
     }
 
     /**
@@ -141,12 +141,13 @@ abstract class DbMapper extends BaseMapper
     }
 
     /**
-     * @param array $data
+     * @param ArraySerializable $object
      * @return ArraySerializable
      * @throws InfrastructureException
      */
-    protected function createObject(array $data) : ArraySerializable
+    protected function createObject(ArraySerializable $object) : ArraySerializable
     {
+        $data = $object->toArray();
         return $this->buildObject(array_merge($data,
             [$this->entityToDataSourceTranslator->insertIdentifier() => $this->mySqlClient->insert(
                 $this->entityToDataSourceTranslator->table(),
@@ -163,7 +164,7 @@ abstract class DbMapper extends BaseMapper
         $parametersForInsert = [];
 
         foreach ($parametersForCreate as $entityParams) {
-            $parametersForInsert[] = $this->entityToDataSourceTranslator->translatePropertyInColumn($entityParams);
+            $parametersForInsert[] = $this->entityToDataSourceTranslator->translatePropertyInColumn($this->buildObject($entityParams)->toArray());
         }
 
         $this->mySqlClient->batchSave(
@@ -173,19 +174,19 @@ abstract class DbMapper extends BaseMapper
     }
 
     /**
-     * @param array $data
+     * @param ArraySerializable $object
      * @return ArraySerializable
      * @throws InfrastructureException
      */
-    protected function updateObject(array $data) : ArraySerializable
+    protected function updateObject(ArraySerializable $object) : ArraySerializable
     {
         $this->mySqlClient->update(
             $this->entityToDataSourceTranslator->table(),
-            $this->entityToDataSourceTranslator->extractUpdateParams($data),
-            $this->entityToDataSourceTranslator->extractUpdateIdentifiers($data)
+            $this->entityToDataSourceTranslator->extractUpdateParams($object->toArray()),
+            $this->entityToDataSourceTranslator->extractUpdateIdentifiers($object->toArray())
         );
 
-        return $this->buildObject($data);
+        return $object;
     }
 
     /**

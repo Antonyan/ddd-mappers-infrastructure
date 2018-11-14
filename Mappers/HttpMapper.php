@@ -211,28 +211,28 @@ abstract class HttpMapper extends BaseMapper
     }
 
     /**
-     * @param array $data
+     * @param ArraySerializable $object
      *
      * @return ArraySerializable
      *
      * @throws InternalException
      * @throws \Infrastructure\Models\Http\Response\ResponseContentTypeException
      */
-    protected function createObject(array $data): ArraySerializable
+    protected function createObject(ArraySerializable $object): ArraySerializable
     {
         return $this->sendRequestForEntity(
-            $this->requestFactory->create(self::POST, $this->urlRender->prepareCreateUrl($data), [], $data)
+            $this->requestFactory->create(self::POST, $this->urlRender->prepareCreateUrl($object->toArray()), [], $object->toArray())
         );
     }
 
     /**
-     * @param array $data
+     * @param ArraySerializable $object
      *
      * @return ArraySerializable
      *
      * @throws InfrastructureException
      */
-    protected function updateObject(array $data): ArraySerializable
+    protected function updateObject(ArraySerializable $object): ArraySerializable
     {
         throw new InfrastructureException('the method is not supported');
     }

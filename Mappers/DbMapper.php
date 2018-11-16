@@ -164,7 +164,7 @@ abstract class DbMapper extends BaseMapper
         $parametersForInsert = [];
 
         foreach ($parametersForCreate as $entityParams) {
-            $parametersForInsert[] = $this->entityToDataSourceTranslator->translatePropertyInColumn($this->buildObject($entityParams)->toArray());
+            $parametersForInsert[] = $this->entityToDataSourceTranslator->translatePropertyInColumn($entityParams);
         }
 
         $this->mySqlClient->batchSave(

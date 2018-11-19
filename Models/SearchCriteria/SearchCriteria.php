@@ -30,6 +30,7 @@ abstract class SearchCriteria
     public const WHERE_GREATER_OR_EQUAL_SIGN = '>=';
     public const WHERE_LESS_SIGN = '<';
     public const WHERE_LESS_OR_EQUAL_SIGN = '<=';
+    public const WHERE_IS_NULL_SIGN = 'IS NULL';
 
     public const TYPE_DATE = 'DATE';
     public const TYPE_DECIMAL = 'DECIMAL';

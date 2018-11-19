@@ -105,8 +105,16 @@ class SearchCriteriaZeroToNullDecorator extends SearchCriteria
      */
     public function isSetType($field) : bool
     {
-        //TODO: support Dates
-        return false;
+        return $this->getCriteria()->isSetType($field);
+    }
+
+    /**
+     * @param $field
+     * @return string
+     */
+    public function getType($field): string
+    {
+        return $this->getCriteria()->getType($field);
     }
 
     /**

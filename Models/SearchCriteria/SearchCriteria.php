@@ -43,5 +43,11 @@ abstract class SearchCriteria
 
     abstract public function orderBy() : array;
 
+    abstract public function groupBy() : array;
+
     abstract public function conditions() : array;
+
+    abstract public function getType($field) : string;
+
+    abstract public function isSetType($field) : bool;
 }

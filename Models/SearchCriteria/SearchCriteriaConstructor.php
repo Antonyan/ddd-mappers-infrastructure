@@ -87,6 +87,16 @@ class SearchCriteriaConstructor extends SearchCriteria
     }
 
     /**
+     * @param $field
+     * @return string
+     */
+    public function getType($field) : string
+    {
+        //TODO: implement
+        return '';
+    }
+
+    /**
      * @return array
      */
     public function conditions() : array

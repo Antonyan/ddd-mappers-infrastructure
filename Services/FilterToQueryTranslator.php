@@ -75,6 +75,12 @@ class FilterToQueryTranslator
                 }
                 $placeholder = $this->getUniquePlaceholder();
                 $whereFieldName = $this->getFieldNameByCompassFilterType($field, $filter);
+
+                if ($compareSign === SearchCriteria::WHERE_IS_NULL_SIGN) {
+                    $whereConditions[] = $whereFieldName . ' ' . $compareSign;
+                    continue;
+                }
+
                 $whereConditions[] = $whereFieldName.' '.$compareSign.' :'.$placeholder;
 
                 if ($compareSign == DbMapper::LIKE_SIGN) {

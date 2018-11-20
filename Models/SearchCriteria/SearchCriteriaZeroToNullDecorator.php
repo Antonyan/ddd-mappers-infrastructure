@@ -49,22 +49,22 @@ class SearchCriteriaZeroToNullDecorator extends SearchCriteria
      */
     private function decorateZeroCondition(array $conditions)
     {
-        $result = $conditions;
         foreach ($conditions as $criteriaSign => $condition) {
-            $field = key($condition);
-            $value = current($condition);
 
-            if (!in_array($field, $this->fields)) {
-                continue;
-            }
+            foreach ($condition as $field => $value) {
 
-            if ($value == 0 && $criteriaSign === SearchCriteria::WHERE_EQUAL_SIGN) {
-                unset($result[$criteriaSign]);
-                $result[SearchCriteria::WHERE_IS_NULL_SIGN] = [$field => null];
+                if (!in_array($field, $this->fields)) {
+                    continue;
+                }
+
+                if ($value == 0 && $criteriaSign === SearchCriteria::WHERE_EQUAL_SIGN) {
+                    unset($conditions[$criteriaSign][$field]);
+                    $conditions[SearchCriteria::WHERE_IS_NULL_SIGN][$field] = null;
+                }
             }
         }
 
-        return $result;
+        return $conditions;
     }
 
     /**

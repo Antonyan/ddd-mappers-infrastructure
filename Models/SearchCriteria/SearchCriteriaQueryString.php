@@ -321,29 +321,16 @@ class SearchCriteriaQueryString extends SearchCriteria
      */
     private function addArrayEqualCondition(array $values) : SearchCriteria
     {
-        list($criteria, $dateCriteria) = $this->splitDateCriteria($values);
+        foreach ($values as $field => $criterion) {
+            if (in_array($field, $this->nameOfDateFields)) {
+                $this->addDateCondition($field, $criterion);
+                continue;
+            }
 
-        foreach ($criteria as $field => $criterion) {
             $this->addEqualCondition($field, $criterion);
         }
 
-        foreach ($dateCriteria as $field => $criterion) {
-            $this->addDateCondition($field, $criterion);
-        }
-
         return $this;
-    }
-
-    /**
-     * @param array $criteria
-     * @return array
-     */
-    private function splitDateCriteria(array $criteria)
-    {
-        $dateCriteria = array_intersect_key($criteria, array_flip($this->nameOfDateFields));
-        $criteria = array_diff_key($criteria, array_flip($this->nameOfDateFields));
-
-        return [$criteria, $dateCriteria];
     }
 
     /**

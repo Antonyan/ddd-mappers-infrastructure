@@ -131,11 +131,6 @@ class SearchCriteriaQueryString extends SearchCriteria
         }
 
         foreach ($this->criteria as $field => $value) {
-            if (\in_array($field, $this->nameOfDateFields, true)) {
-                $this->addDateCondition($field, $value);
-                continue;
-            }
-
             if (array_key_exists($field, $this->conversionMap())){
                 $this->conversionMap()[$field]($value);
                 continue;
@@ -289,13 +284,13 @@ class SearchCriteriaQueryString extends SearchCriteria
      */
     private function addDateCondition($field, $value) : SearchCriteria
     {
-        if (is_array($value)) {
-            if (count($value) == 2) {
-                $this->conditions[self::WHERE_GREATER_OR_EQUAL_SIGN][$field] = date('Y-m-d 00:00:00', strtotime($value[0]));
-                $this->conditions[self::WHERE_LESS_OR_EQUAL_SIGN][$field] = date('Y-m-d 23:59:59', strtotime($value[1]));
-            }
+        $values = explode(',', $value);
+
+        if (count($values) == 2) {
+            $this->conditions[self::WHERE_GREATER_OR_EQUAL_SIGN][$field] = date('Y-m-d 00:00:00', strtotime($values[0]));
+            $this->conditions[self::WHERE_LESS_OR_EQUAL_SIGN][$field] = date('Y-m-d 23:59:59', strtotime($values[1]));
         } else {
-            $this->conditions[self::WHERE_GREATER_OR_EQUAL_SIGN][$field] = date('Y-m-d 00:00:00', strtotime($value));
+            $this->conditions[self::WHERE_GREATER_OR_EQUAL_SIGN][$field] = date('Y-m-d 00:00:00', strtotime($values[0]));
         }
 
         return $this;
@@ -326,11 +321,29 @@ class SearchCriteriaQueryString extends SearchCriteria
      */
     private function addArrayEqualCondition(array $values) : SearchCriteria
     {
-        foreach ($values as $field => $value) {
-            $this->addEqualCondition($field, $value);
+        list($criteria, $dateCriteria) = $this->splitDateCriteria($values);
+
+        foreach ($criteria as $field => $criterion) {
+            $this->addEqualCondition($field, $criterion);
+        }
+
+        foreach ($dateCriteria as $field => $criterion) {
+            $this->addDateCondition($field, $criterion);
         }
 
         return $this;
+    }
+
+    /**
+     * @param array $criteria
+     * @return array
+     */
+    private function splitDateCriteria(array $criteria)
+    {
+        $dateCriteria = array_intersect_key($criteria, array_flip($this->nameOfDateFields));
+        $criteria = array_diff_key($criteria, array_flip($this->nameOfDateFields));
+
+        return [$criteria, $dateCriteria];
     }
 
     /**

@@ -131,11 +131,6 @@ class SearchCriteriaQueryString extends SearchCriteria
         }
 
         foreach ($this->criteria as $field => $value) {
-            if (\in_array($field, $this->nameOfDateFields, true)) {
-                $this->addDateCondition($field, $value);
-                continue;
-            }
-
             if (array_key_exists($field, $this->conversionMap())){
                 $this->conversionMap()[$field]($value);
                 continue;
@@ -289,13 +284,13 @@ class SearchCriteriaQueryString extends SearchCriteria
      */
     private function addDateCondition($field, $value) : SearchCriteria
     {
-        if (is_array($value)) {
-            if (count($value) == 2) {
-                $this->conditions[self::WHERE_GREATER_OR_EQUAL_SIGN][$field] = date('Y-m-d 00:00:00', strtotime($value[0]));
-                $this->conditions[self::WHERE_LESS_OR_EQUAL_SIGN][$field] = date('Y-m-d 23:59:59', strtotime($value[1]));
-            }
+        $values = explode(',', $value);
+
+        if (count($values) == 2) {
+            $this->conditions[self::WHERE_GREATER_OR_EQUAL_SIGN][$field] = date('Y-m-d 00:00:00', strtotime($values[0]));
+            $this->conditions[self::WHERE_LESS_OR_EQUAL_SIGN][$field] = date('Y-m-d 23:59:59', strtotime($values[1]));
         } else {
-            $this->conditions[self::WHERE_GREATER_OR_EQUAL_SIGN][$field] = date('Y-m-d 00:00:00', strtotime($value));
+            $this->conditions[self::WHERE_GREATER_OR_EQUAL_SIGN][$field] = date('Y-m-d 00:00:00', strtotime($values[0]));
         }
 
         return $this;
@@ -326,8 +321,13 @@ class SearchCriteriaQueryString extends SearchCriteria
      */
     private function addArrayEqualCondition(array $values) : SearchCriteria
     {
-        foreach ($values as $field => $value) {
-            $this->addEqualCondition($field, $value);
+        foreach ($values as $field => $criterion) {
+            if (in_array($field, $this->nameOfDateFields)) {
+                $this->addDateCondition($field, $criterion);
+                continue;
+            }
+
+            $this->addEqualCondition($field, $criterion);
         }
 
         return $this;

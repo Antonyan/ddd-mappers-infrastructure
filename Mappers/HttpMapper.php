@@ -47,12 +47,17 @@ abstract class HttpMapper extends BaseMapper
     /**
      * @var RequestFactoryInterface
      */
-    protected $requestFactory;
+    private $requestFactory;
 
     /**
      * @var UrlRender
      */
     protected $urlRender;
+
+    /**
+     * @var array
+     */
+    private $config;
 
     /**
      * HttpMapper constructor.
@@ -69,14 +74,15 @@ abstract class HttpMapper extends BaseMapper
         HttpClient $httpClient,
         RequestFactoryInterface $requestFactory,
         BaseFactory $factory
-    )
-    {
+    ) {
         $this->httpClient = $httpClient;
         $this->requestFactory = $requestFactory;
         $this->factory = $factory;
 
         $this->defaultHeaders = new Headers($httpMapperConfig[self::DEFAULT_HEADERS] ?? []);
         $this->urlRender = new UrlRender($httpMapperConfig[self::AVAILABLE_URLS]);
+
+        $this->config = $httpMapperConfig;
     }
 
     /**
@@ -89,7 +95,7 @@ abstract class HttpMapper extends BaseMapper
     {
         $params = $this->prepareParams($filter);
 
-        $result = $this->sendRequestForCollection($this->requestFactory->create(
+        $result = $this->sendRequestForCollection($this->createRequest(
             self::GET,
             $this->urlRender->prepareLoadUrl([], $params)
         ));
@@ -110,7 +116,7 @@ abstract class HttpMapper extends BaseMapper
     public function get(array $identifiers)
     {
         return $this->sendRequestForEntity(
-            $this->requestFactory->create(self::GET, $this->urlRender->prepareGetUrl($identifiers))
+            $this->createRequest(self::GET, $this->urlRender->prepareGetUrl($identifiers))
         );
     }
 
@@ -134,7 +140,7 @@ abstract class HttpMapper extends BaseMapper
     public function update(array $objectData)
     {
         return $this->sendRequestForEntity(
-            $this->requestFactory->create(self::PUT, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
+            $this->createRequest(self::PUT, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
         );
     }
 
@@ -147,7 +153,7 @@ abstract class HttpMapper extends BaseMapper
      */
     public function delete(string $byPropertyName, $propertyValue): bool
     {
-        $this->sendRequest($this->requestFactory->create(
+        $this->sendRequest($this->createRequest(
             self::DELETE, $this->urlRender->prepareDeleteUrl([$byPropertyName => $propertyValue])
         ));
 
@@ -163,7 +169,7 @@ abstract class HttpMapper extends BaseMapper
     public function updatePatch(array $objectData)
     {
         return $this->sendRequestForEntity(
-            $this->requestFactory->create(self::PATCH, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
+            $this->createRequest(self::PATCH, $this->urlRender->prepareUpdateUrl($objectData), [], $objectData)
         );
     }
 
@@ -221,7 +227,7 @@ abstract class HttpMapper extends BaseMapper
     protected function createObject(ArraySerializable $object): ArraySerializable
     {
         return $this->sendRequestForEntity(
-            $this->requestFactory->create(self::POST, $this->urlRender->prepareCreateUrl($object->toArray()), [], $object->toArray())
+            $this->createRequest(self::POST, $this->urlRender->prepareCreateUrl($object->toArray()), [], $object->toArray())
         );
     }
 
@@ -267,11 +273,36 @@ abstract class HttpMapper extends BaseMapper
      */
     protected function mergeDefaultData(RequestInterface $request)
     {
-        return $this->requestFactory->create(
+        return $this->createRequest(
             $request->getMethod(),
             $request->getUri(),
             $this->defaultHeaders->merge(new Headers($request->getHeaders()))->toArray(),
-            $request->getBody()
+            json_decode($request->getBody()->getContents())
+        );
+    }
+
+    /**
+     * @return array
+     */
+    protected function config()
+    {
+        return $this->config;
+    }
+
+    /**
+     * @param $method
+     * @param $uri
+     * @param array $headers
+     * @param array $body
+     * @return RequestInterface
+     */
+    protected function createRequest($method, $uri, array $headers = [], array $body = [])
+    {
+        return $this->requestFactory->create(
+            $method,
+            $uri,
+            $headers,
+            (count($body) ? json_encode($body) : null)
         );
     }
 }

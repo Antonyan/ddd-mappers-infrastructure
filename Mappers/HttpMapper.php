@@ -277,7 +277,7 @@ abstract class HttpMapper extends BaseMapper
             $request->getMethod(),
             $request->getUri(),
             $this->defaultHeaders->merge(new Headers($request->getHeaders()))->toArray(),
-            json_decode($request->getBody()->getContents())
+            (($body = json_decode($request->getBody()->getContents(), true)) ? $body : [])
         );
     }
 

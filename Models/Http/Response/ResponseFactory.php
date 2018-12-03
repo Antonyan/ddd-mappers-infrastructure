@@ -5,6 +5,7 @@ namespace Infrastructure\Models\Http\Response;
 
 use Infrastructure\Models\Http\ResponseInterface;
 use \Psr\Http\Message\ResponseInterface as PsrResponseInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 class ResponseFactory
 {
@@ -16,6 +17,10 @@ class ResponseFactory
     public function createFromResponse(PsrResponseInterface $response): ResponseInterface
     {
         $contentType = $response->getHeader('Content-Type')[0] ?? '';
+
+        if ($response->getStatusCode() == Response::HTTP_NO_CONTENT) {
+            return new JsonResponse($response);
+        }
 
         foreach ($this->getContentTypeResponseMap($response) as $allowedContentType => $creatorResponse) {
             if ($this->isAllowedContentType($contentType, $allowedContentType)) {

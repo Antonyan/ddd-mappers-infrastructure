@@ -9,6 +9,7 @@ use Infrastructure\Exceptions\InfrastructureException;
 use Infrastructure\Exceptions\InternalException;
 use Infrastructure\Models\Http\Response\ResponseFactory;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
 class HttpClient
 {
@@ -56,10 +57,10 @@ class HttpClient
     }
 
     /**
-     * @param ResponseInterface $response
+     * @param PsrResponseInterface $response
      * @return array|mixed
      */
-    private function getResponseBodyFormated(ResponseInterface $response)
+    private function getResponseBodyFormated(PsrResponseInterface $response)
     {
         $contentType = $response->getHeader('Content-Type')[0] ?? '';
 

@@ -1,7 +1,5 @@
 <?php
-
 namespace Infrastructure\Models\Http;
-
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -44,16 +42,35 @@ class HttpClient
             $response = $exception->getResponse();
 
             throw new InternalException(
-                $response->getBody()->getContents(),
+                $exception->getMessage(),
                 $response->getStatusCode(),
                 HttpExceptionInterface::DEFAULT_ERROR_CODE,
                 $response->getHeaders(),
-                [],
+                $this->getResponseBodyFormated($response),
                 $exception,
                 $exception->getCode()
             );
         } catch (GuzzleException $exception) {
             throw new InfrastructureException('Guzzle Exception', $exception);
         }
+    }
+
+    /**
+     * @param ResponseInterface $response
+     * @return array|mixed
+     */
+    private function getResponseBodyFormated(ResponseInterface $response)
+    {
+        $contentType = $response->getHeader('Content-Type')[0] ?? '';
+
+        if (empty($contentType)) {
+            return [$response->getBody()->getContents()];
+        }
+
+        if (strpos(ResponseInterface::CONTENT_TYPE_JSON, $contentType)) {
+            return json_decode($response->getBody()->getContents(), true);
+        }
+
+        return [$response->getBody()->getContents()];
     }
 }

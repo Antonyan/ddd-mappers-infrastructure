@@ -4,6 +4,7 @@ namespace Infrastructure;
 
 use Exception;
 use Infrastructure\Events\RequestEvent;
+use Infrastructure\Exceptions\InternalException;
 use Infrastructure\Exceptions\ResourceNotFoundException as InternalResourceNotFoundException;
 
 use Infrastructure\Models\ContainerBuilder;
@@ -17,6 +18,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
 use Symfony\Component\Routing\RouteCollection;
@@ -95,6 +97,13 @@ class Application extends HttpKernel
             }
 
             $response = call_user_func_array($controller, $arguments);
+        } catch (MethodNotAllowedException $methodNotAllowedException) {
+            $response = $this->handleException(
+                $request,
+                $type,
+                new InternalException('Method Not Allowed!', Response::HTTP_METHOD_NOT_ALLOWED),
+                $catch
+            );
         } catch (ResourceNotFoundException $exception) {
             $response = $this->handleException(
                 $request,

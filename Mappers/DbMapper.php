@@ -45,12 +45,12 @@ abstract class DbMapper extends BaseMapper
     /**
      * @var MySQLClient
      */
-    private $mySqlClient;
+    protected $mySqlClient;
 
     /**
      * @var EntityToDataSourceTranslator
      */
-    private $entityToDataSourceTranslator;
+    protected $entityToDataSourceTranslator;
 
     /**
      * DbMapper constructor.

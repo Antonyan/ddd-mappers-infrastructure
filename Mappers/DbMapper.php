@@ -205,7 +205,7 @@ abstract class DbMapper extends BaseMapper
         $entities = $this->load(new SearchCriteriaConstructor($conditions, 1));
 
         if ($entities->count() == 0) {
-            throw new ResourceNotFoundException("Resource not found!");
+            throw new ResourceNotFoundException("Resource not found!(" . $this->currentTable()  . ")");
         }
 
         return $entities->getFirst();

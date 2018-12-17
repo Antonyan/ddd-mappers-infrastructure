@@ -12,14 +12,13 @@ class ResponseFactory
     /**
      * @param PsrResponseInterface $response
      * @return ResponseInterface
-     * @throws ResponseContentTypeException
      */
     public function createFromResponse(PsrResponseInterface $response): ResponseInterface
     {
         $contentType = $response->getHeader('Content-Type')[0] ?? '';
 
         if ($response->getStatusCode() == Response::HTTP_NO_CONTENT) {
-            return new JsonResponse($response);
+            return new EmptyResponse($response);
         }
 
         foreach ($this->getContentTypeResponseMap($response) as $allowedContentType => $creatorResponse) {
@@ -28,7 +27,7 @@ class ResponseFactory
             }
         }
 
-        throw new ResponseContentTypeException($contentType);
+        return new RawResponse($response);
     }
 
     /**

@@ -146,7 +146,7 @@ class SearchCriteriaQueryString extends SearchCriteria
         }
 
         $this->criteriaParsed = true;
-
+        
         return $this;
     }
 
@@ -165,6 +165,7 @@ class SearchCriteriaQueryString extends SearchCriteria
             self::WHERE_LESS_OR_EQUAL => function($value) { $this->addArrayLessOrEqualCondition($value);},
             self::WHERE_GREATER => function($value) { $this->addArrayGreaterCondition($value);},
             self::WHERE_GREATER_OR_EQUAL => function($value) { $this->addArrayGreaterOrEqualCondition($value);},
+            self::WHERE_NOT_EQUAL => function($value) { $this->addNotEqualCondition($value);},
         ];
     }
 
@@ -328,6 +329,19 @@ class SearchCriteriaQueryString extends SearchCriteria
             }
 
             $this->addEqualCondition($field, $criterion);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param array $values
+     * @return SearchCriteria
+     */
+    private function addNotEqualCondition(array $values) : SearchCriteria
+    {
+        foreach ($values as $field => $value) {
+            $this->conditions[self::WHERE_NOT_EQUAL_SIGN][$field] = $value;
         }
 
         return $this;

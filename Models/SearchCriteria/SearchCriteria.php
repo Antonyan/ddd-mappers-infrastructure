@@ -17,6 +17,7 @@ abstract class SearchCriteria
     public const WHERE_LIKE = 'like';
 
     public const WHERE_EQUAL = 'eq';
+    public const WHERE_NOT_EQUAL = 'ne';
     public const WHERE_GREATER = 'gt';
     public const WHERE_GREATER_OR_EQUAL = 'ge';
     public const WHERE_LESS = 'lt';
@@ -26,6 +27,7 @@ abstract class SearchCriteria
     public const OR_WHERE_LIKE = 'orlike';
 
     public const WHERE_EQUAL_SIGN = '=';
+    public const WHERE_NOT_EQUAL_SIGN = '<>';
     public const WHERE_GREATER_SIGN = '>';
     public const WHERE_GREATER_OR_EQUAL_SIGN = '>=';
     public const WHERE_LESS_SIGN = '<';

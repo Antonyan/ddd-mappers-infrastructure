@@ -47,8 +47,8 @@ $containerBuilder->register('dispatcher', EventDispatcher::class)
     ->addMethodCall('addSubscriber', [new Reference('listener.router')])
     ->addMethodCall('addSubscriber', [new Reference('listener.response')])
     ->addMethodCall('addSubscriber', [new Reference('listener.exception')])
-    ->addMethodCall('addListener', ['request', [new Reference('listener.request'), 'onRequest']])
-    ->addMethodCall('addListener', ['request', [new Reference('listener.auth'), 'onRequest']])
+    ->addMethodCall('addListener', [Application::EVENT_BEFORE_DISPATCH_REQUEST, [new Reference('listener.request'), 'onRequest']])
+    ->addMethodCall('addListener', [Application::EVENT_BEFORE_DISPATCH_REQUEST, [new Reference('listener.auth'), 'onRequest']])
 ;
 
 $containerBuilder->register('application', Application::class)

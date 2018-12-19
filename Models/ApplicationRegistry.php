@@ -1,5 +1,5 @@
 <?php
-namespace Infrastructure\Services;
+namespace Infrastructure\Models;
 
 use Infrastructure\Exceptions\ApplicationRegistryException;
 

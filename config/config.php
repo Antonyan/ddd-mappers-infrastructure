@@ -7,5 +7,6 @@ return [
         'password' => getenv('DDD_RBD_PASSWORD'),
         'host' => getenv('DDD_RBD_HOST'),
         'driver' => getenv('DDD_RBD_DRIVER'),
-    ]
+    ],
+    'loggingType' => getenv('LOGGING_TYPE'),
 ];

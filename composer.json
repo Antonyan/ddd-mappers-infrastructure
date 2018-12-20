@@ -21,7 +21,11 @@
         "symfony/validator": "^4.1",
         "vlucas/phpdotenv": "^2.5",
         "doctrine/dbal": "^2.8",
-        "guzzlehttp/guzzle": "^6.3"
+        "guzzlehttp/guzzle": "^6.3",
+        "aws/aws-sdk-php": "^3.24",
+        "aws/aws-php-sns-message-validator": "^1.1",
+        "monolog/monolog": "^1.21",
+        "maxbanton/cwh": "^1.0"
     },
 
     "autoload": {

@@ -25,7 +25,9 @@ use Symfony\Component\Routing\RouteCollection;
 
 class Application extends HttpKernel
 {
-    const ENV_PROD = 'prod';
+    public const ENV_PROD = 'prod';
+
+    public const EVENT_BEFORE_DISPATCH_REQUEST = 'request';
 
     /**
      * @var UrlMatcherInterface
@@ -93,7 +95,7 @@ class Application extends HttpKernel
             $arguments = $this->argumentResolver->getArguments($request, $controller);
 
             if($type == HttpKernelInterface::MASTER_REQUEST) {
-                $this->eventDispatcher->dispatch('request', new RequestEvent($request, $controller[0], $controller[1]));
+                $this->eventDispatcher->dispatch(self::EVENT_BEFORE_DISPATCH_REQUEST, new RequestEvent($request, $controller[0], $controller[1]));
             }
 
             $response = call_user_func_array($controller, $arguments);

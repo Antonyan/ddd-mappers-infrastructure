@@ -4,6 +4,7 @@ namespace Infrastructure\Services;
 
 use Exception;
 use Infrastructure\Exceptions\InfrastructureException;
+use Infrastructure\Models\ApplicationRegistry;
 use Infrastructure\Models\Config;
 use Infrastructure\Models\ServiceContainerBuilderFactory;
 use ReflectionException;
@@ -40,5 +41,13 @@ abstract class BaseService
     protected function config() : Config
     {
         return $this->container()->get('config');
+    }
+
+    /**
+     * @return ApplicationRegistry
+     */
+    protected function applicationRegistry() : ApplicationRegistry
+    {
+        return ApplicationRegistry::getInstance();
     }
 }

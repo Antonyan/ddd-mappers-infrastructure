@@ -3,6 +3,7 @@
 namespace Infrastructure\Services;
 
 use Infrastructure\Exceptions\InfrastructureException;
+use Psr\Log\LoggerInterface;
 use ReflectionException;
 
 abstract class LogService extends BaseService
@@ -11,7 +12,7 @@ abstract class LogService extends BaseService
     protected const LOG_TO_CLOUD_WATCH = 'cloudWatch';
 
     /**
-     * @return null
+     * @return LoggerInterface
      * @throws InfrastructureException
      * @throws ReflectionException
      */

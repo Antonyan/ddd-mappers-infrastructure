@@ -20,12 +20,12 @@ class FileLoggingRegistry
      */
     public function logger($fileName, $channel) : LoggerInterface
     {
-        if (isset ($this->logStructure[$fileName])){
-            return $this->logStructure[$fileName];
+        if (isset ($this->logStructure[$fileName][$channel])){
+            return $this->logStructure[$fileName][$channel];
         }
 
-        $this->logStructure[$fileName] = new Logger($channel, [(new Stream())->handler($fileName)]);
+        $this->logStructure[$fileName][$channel] = new Logger($channel, [(new Stream())->handler($fileName)]);
 
-        return $this->logStructure[$fileName];
+        return $this->logStructure[$fileName][$channel];
     }
 }

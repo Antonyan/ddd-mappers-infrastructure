@@ -1,5 +1,5 @@
 # ddd-mappers-infrastructure
-Infrastructure layer for DDD project based on Data Mapper as Data source pattern [Data Mapper](https://martinfowler.com/eaaCatalog/dataMapper.html)
+Infrastructure layer for [DDD project] (https://github.com/Antonyan/ddd-mappers-project) based on Data Mapper as Data source pattern [Data Mapper](https://martinfowler.com/eaaCatalog/dataMapper.html)
 <br/>
 
 ## General

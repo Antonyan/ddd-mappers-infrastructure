@@ -8,6 +8,8 @@ use Infrastructure\Exceptions\InternalException;
 use Infrastructure\Exceptions\ResourceNotFoundException as InternalResourceNotFoundException;
 
 use Infrastructure\Models\ContainerBuilder;
+use Infrastructure\Models\ApplicationExceptionInfo;
+use Infrastructure\Services\ApplicationLogService;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -114,8 +116,16 @@ class Application extends HttpKernel
                 $catch
             );
         } catch (Exception $exception) {
+            (new ApplicationLogService())->getLogger()->critical(
+                'Exception: ' . $exception->getMessage(),
+                (new ApplicationExceptionInfo($request, $controller[0], $controller[1]))->toArray()
+            );
             $response = $this->handleException($request, $type, $exception, $catch);
         } catch (\Error $error) {
+            (new ApplicationLogService())->getLogger()->critical(
+                'Error: ' . $error->getMessage(),
+                (new ApplicationExceptionInfo($request, $controller[0], $controller[1]))->toArray()
+            );
             $response = $this->handleException($request, $type, new Exception($error->getMessage(), $error->getCode(), $error), $catch);
         }
 

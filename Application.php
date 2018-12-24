@@ -116,11 +116,15 @@ class Application extends HttpKernel
                 $catch
             );
         } catch (Exception $exception) {
-            (new ApplicationLogService())->getLogger()->critical(
-                'Exception: ' . $exception->getMessage(),
-                (new ApplicationExceptionInfo($request, $controller[0], $controller[1]))->toArray()
-            );
             $response = $this->handleException($request, $type, $exception, $catch);
+
+            if ($response->getStatusCode() === Response::HTTP_INTERNAL_SERVER_ERROR) {
+                (new ApplicationLogService())->getLogger()->critical(
+                    'Exception: ' . $exception->getMessage(),
+                    (new ApplicationExceptionInfo($request, $controller[0], $controller[1]))->toArray()
+                );
+            }
+
         } catch (\Error $error) {
             (new ApplicationLogService())->getLogger()->critical(
                 'Error: ' . $error->getMessage(),

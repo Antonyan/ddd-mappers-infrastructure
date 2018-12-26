@@ -18,7 +18,7 @@ Infrastructure container includes **db** connection, **MySqlClient**, **RequestF
 
 ## DB interaction
 #### Connection
-If you're using MySQL as DB you should specify  DDD_RBD_NAME, DDD_RBD_USER, DDD_RBD_PASSWORD, DDD_RBD_HOST, DDD_RBD_DRIVER (pdo_mysql) as env variables or just in .env file of the [DDD project] (https://github.com/Antonyan/ddd-mappers-project)
+If you're using MySQL as DB you should specify  DDD_RBD_NAME, DDD_RBD_USER, DDD_RBD_PASSWORD, DDD_RBD_HOST, DDD_RBD_DRIVER (pdo_mysql) as env variables or just in .env file of the [DDD project](https://github.com/Antonyan/ddd-mappers-project)
 #### DbMapper
 For [Rapid application development (RAD)](https://en.wikipedia.org/wiki/Rapid_application_development) we were created such abstraction as DbMapper.
 If you need CRUD implementation only it'll be supported out of the box. All that you need is to specify table and fields mapping in Module config.

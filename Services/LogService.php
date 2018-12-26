@@ -3,6 +3,7 @@
 namespace Infrastructure\Services;
 
 use Infrastructure\Exceptions\InfrastructureException;
+use Infrastructure\Models\Logging\LoggerNullObject;
 use Psr\Log\LoggerInterface;
 use ReflectionException;
 
@@ -19,7 +20,7 @@ abstract class LogService extends BaseService
     public function getLogger()
     {
         if (!$this->config()->loggingType()){
-            return null;
+            return new LoggerNullObject();
         }
 
         if (!array_key_exists($this->config()->loggingType(), $this->loggersMap())){

@@ -234,7 +234,7 @@ class SearchCriteriaQueryString extends SearchCriteria
     private function addLessCondition($field, $value) : SearchCriteria
     {
         $this->conditions[self::WHERE_LESS_SIGN][$field] = $value;
-        $this->addFieldType($field, ($this->isFieldTypeDate($field) ? self::TYPE_DATE : self::TYPE_DECIMAL));
+        $this->addFieldType($field, $this->getFieldType($field));
 
         return $this;
     }
@@ -247,7 +247,7 @@ class SearchCriteriaQueryString extends SearchCriteria
     private function addLessOrEqualCondition($field, $value) : SearchCriteria
     {
         $this->conditions[self::WHERE_LESS_OR_EQUAL_SIGN][$field] = $value;
-        $this->addFieldType($field, ($this->isFieldTypeDate($field) ? self::TYPE_DATE : self::TYPE_DECIMAL));
+        $this->addFieldType($field, $this->getFieldType($field));
 
         return $this;
     }
@@ -260,7 +260,7 @@ class SearchCriteriaQueryString extends SearchCriteria
     private function addGreaterCondition($field, $value) : SearchCriteria
     {
         $this->conditions[self::WHERE_GREATER_SIGN][$field] = $value;
-        $this->addFieldType($field, ($this->isFieldTypeDate($field) ? self::TYPE_DATE : self::TYPE_DECIMAL));
+        $this->addFieldType($field, $this->getFieldType($field));
 
         return $this;
     }
@@ -273,7 +273,7 @@ class SearchCriteriaQueryString extends SearchCriteria
     private function addGreaterOrEqualCondition($field, $value) : SearchCriteria
     {
         $this->conditions[self::WHERE_GREATER_OR_EQUAL_SIGN][$field] = $value;
-        $this->addFieldType($field, ($this->isFieldTypeDate($field) ? self::TYPE_DATE : self::TYPE_DECIMAL));
+        $this->addFieldType($field, $this->getFieldType($field));
 
         return $this;
     }
@@ -452,6 +452,15 @@ class SearchCriteriaQueryString extends SearchCriteria
     private function isFieldTypeDate($field) : bool
     {
         return in_array($field, $this->nameOfDateFields);
+    }
+
+    /**
+     * @param $field
+     * @return string
+     */
+    private function getFieldType($field): string
+    {
+        return $this->isFieldTypeDate($field) ? self::TYPE_DATE : self::TYPE_DECIMAL;
     }
 
     /**

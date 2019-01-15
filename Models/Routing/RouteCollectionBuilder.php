@@ -100,6 +100,18 @@ class RouteCollectionBuilder
      * @return RouteCollectionBuilder
      * @throws InfrastructureException
      */
+    public function addPATCH(string $url, string $presentationService, string $serviceMethod): RouteCollectionBuilder
+    {
+        return $this->addUrl('PATCH', $url, $presentationService, $serviceMethod);
+    }
+
+    /**
+     * @param string $url
+     * @param string $presentationService
+     * @param string $serviceMethod
+     * @return RouteCollectionBuilder
+     * @throws InfrastructureException
+     */
     public function addDELETE(string $url, string $presentationService, string $serviceMethod) : RouteCollectionBuilder
     {
         return $this->addUrl('DELETE', $url, $presentationService, $serviceMethod);

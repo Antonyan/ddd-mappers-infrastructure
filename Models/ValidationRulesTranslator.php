@@ -2,13 +2,10 @@
 
 namespace Infrastructure\Models;
 
-use Doctrine\Common\Annotations\AnnotationException;
-use Doctrine\Common\Annotations\AnnotationReader;
+
 use Infrastructure\Annotations\Validation;
 use Infrastructure\Exceptions\InfrastructureException;
-use Infrastructure\Services\BaseService;
-use ReflectionClass;
-use ReflectionException;
+use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Constraints\Date;
 use Symfony\Component\Validator\Constraints\DateTime;
 use Symfony\Component\Validator\Constraints\Length;
@@ -68,7 +65,7 @@ class ValidationRulesTranslator
      * @throws InvalidOptionsException
      * @throws MissingOptionsException
      */
-    private function addType($type) : Type
+    private function detectTypeConstraint($type) : Constraint
     {
         $supportedTypes = ['array', 'bool', 'callable', 'float', 'double', 'int', 'integer',
             'iterable', 'long', 'null', 'numeric', 'object', 'real', 'resource', 'scalar', 'string'];
@@ -92,14 +89,11 @@ class ValidationRulesTranslator
 
     /**
      * @return array
-     * @throws ConstraintDefinitionException
-     * @throws InvalidOptionsException
-     * @throws MissingOptionsException
      */
     private function constrainsMap() : array
     {
         return[
-            'type' => function($value) {return $this->addType($value);},
+            'type' => function($value) {return $this->detectTypeConstraint($value);},
             'required' => function($value) {return new NotBlank();},
             'minLength' => function($value) {return new Length(['min' => $value]);},
             'maxLength' => function($value) {return new Length(['max' => $value]);},

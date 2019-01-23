@@ -38,8 +38,9 @@ abstract class SearchCriteria
     public const TYPE_DECIMAL = 'DECIMAL';
 
     public const MAX_LIMIT = 100;
+    public const LIMIT_IS_NO_SPECIFIED = 0;
 
-    abstract public function limit() : int;
+    abstract public function limit(): int;
 
     abstract public function offset() : int;
 
@@ -52,4 +53,9 @@ abstract class SearchCriteria
     abstract public function getType($field) : string;
 
     abstract public function isSetType($field) : bool;
+
+    public function isSpecifiedLimit(): bool
+    {
+        return $this->limit() !== self::LIMIT_IS_NO_SPECIFIED;
+    }
 }

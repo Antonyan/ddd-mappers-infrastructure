@@ -2,8 +2,12 @@
 
 namespace Infrastructure\Models\SearchCriteria;
 
+use Infrastructure\Exceptions\ClientErrorException;
+
 class SearchCriteriaQueryString extends SearchCriteria
 {
+    public const MAX_LIMIT = 100;
+
     /**
      * @var array
      */
@@ -175,7 +179,7 @@ class SearchCriteriaQueryString extends SearchCriteria
     private function equalConditionsMap() : array
     {
         return [
-            self::LIMIT => function($value) { $this->limit = $this->limit <= self::MAX_LIMIT ? $value : self::MAX_LIMIT;},
+            self::LIMIT => function($value) { $this->addLimit($value);},
             self::OFFSET => function($value) { $this->offset = $value;},
             self::ORDER_ASCENDING => function($value) { $this->addOrderByAscending($value);},
             self::ORDER_DESCENDING => function($value) { $this->addOrderByDescending($value);},
@@ -472,5 +476,18 @@ class SearchCriteriaQueryString extends SearchCriteria
     {
         $this->types[$field] = $type;
         return $this;
+    }
+
+    /**
+     * @param $value
+     * @throws ClientErrorException
+     */
+    private function addLimit($value)
+    {
+        if ($value > self::MAX_LIMIT) {
+            throw new ClientErrorException("The limit cannot be greater than " . self::MAX_LIMIT . ' value.');
+        }
+
+        $this->limit = $value;
     }
 }

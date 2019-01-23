@@ -31,7 +31,7 @@ class SearchCriteriaConstructor extends SearchCriteria
      * @param int $offset
      * @param OrderBy $orderBy
      */
-    public function __construct(array $conditions, int $limit = self::MAX_LIMIT, int $offset = 0, OrderBy $orderBy = null)
+    public function __construct(array $conditions, int $limit = self::LIMIT_IS_NO_SPECIFIED, int $offset = 0, OrderBy $orderBy = null)
     {
         $this->conditions = $conditions;
         $this->limit = $limit;
@@ -42,9 +42,9 @@ class SearchCriteriaConstructor extends SearchCriteria
     /**
      * @return int
      */
-    public function limit() : int
+    public function limit(): int
     {
-        return $this->limit <= self::MAX_LIMIT ? $this->limit : self::MAX_LIMIT;
+        return $this->limit;
     }
 
     /**

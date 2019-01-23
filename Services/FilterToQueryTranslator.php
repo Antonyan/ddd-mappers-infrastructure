@@ -118,11 +118,11 @@ class FilterToQueryTranslator
      */
     public function generateLimit(SearchCriteria $filter)
     {
-        if ($filter->limit() === DbMapper::SELECT_LIMIT_ALL) {
-            return '';
+        if ($filter->isSpecifiedLimit()) {
+            return ' LIMIT '. $filter->offset().', '. $filter->limit().' ';
         }
 
-        return ' LIMIT '. $filter->offset().', '. $filter->limit().' ';
+        return '';
     }
 
     /**

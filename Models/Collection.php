@@ -292,4 +292,13 @@ class Collection implements \IteratorAggregate, \Countable, ArraySerializable
             $this->push($item);
         }
     }
+
+    /**
+     * @return Collection
+     */
+    public function flashKeys()
+    {
+        $this->collection = array_values($this->collection);
+        return $this;
+    }
 }

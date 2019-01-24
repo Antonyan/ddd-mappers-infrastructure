@@ -6,7 +6,7 @@ use Infrastructure\Exceptions\ClientErrorException;
 
 class SearchCriteriaQueryString extends SearchCriteria
 {
-    public const MAX_LIMIT = 100;
+    public const MAX_LIMIT = 1000;
 
     /**
      * @var array

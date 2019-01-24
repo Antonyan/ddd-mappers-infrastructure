@@ -37,7 +37,7 @@ abstract class SearchCriteria
     public const TYPE_DATE = 'DATE';
     public const TYPE_DECIMAL = 'DECIMAL';
 
-    public const MAX_LIMIT = 100;
+    public const MAX_LIMIT = 1000;
     public const LIMIT_IS_NO_SPECIFIED = 0;
 
     abstract public function limit(): int;

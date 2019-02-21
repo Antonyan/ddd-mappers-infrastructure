@@ -4,8 +4,8 @@ namespace Infrastructure\Services\Auth;
 
 use Infrastructure\Exceptions\ClientErrorException;
 use Infrastructure\Exceptions\InternalException;
-use Infrastructure\Models\Auth\AuthorizationRequestHeaders;
 use Infrastructure\Models\Auth\Permissions;
+use Infrastructure\Models\Auth\RoleExtractor;
 use Infrastructure\Models\Auth\Rule;
 use Infrastructure\Models\ContainerBuilder;
 use Infrastructure\Services\BaseService;
@@ -24,14 +24,21 @@ class PolicyValidator
     private $policies;
 
     /**
+     * @var RoleExtractor
+     */
+    private $roleExtractor;
+
+    /**
      * PolicyValidator constructor.
      * @param Permissions $permissions
      * @param ContainerBuilder $policies
+     * @param RoleExtractor $roleExtractor
      */
-    public function __construct(Permissions $permissions, ContainerBuilder $policies)
+    public function __construct(Permissions $permissions, ContainerBuilder $policies, RoleExtractor $roleExtractor)
     {
         $this->permissions = $permissions;
         $this->policies = $policies;
+        $this->roleExtractor = $roleExtractor;
     }
 
     /**
@@ -46,7 +53,7 @@ class PolicyValidator
         /** @var Rule $rule */
         foreach ($this->permissions->policies($controller, $method) as $rule) {
             if (
-                \in_array($rule->roleName(), explode(',', $this->authorizationRequestHeaders($request)->getRoles()), true)
+                $this->isRoleHasAccess($request, $rule)
                 &&
                 $this->allPoliciesMet($rule->policies(), $request)
             ){
@@ -55,22 +62,6 @@ class PolicyValidator
         }
 
         throw new ClientErrorException('Access denied. Please, check policy and role', 403);
-    }
-
-    /**
-     * @param Request $request
-     * @return AuthorizationRequestHeaders
-     * @throws ClientErrorException
-     */
-    private function authorizationRequestHeaders(Request $request)
-    {
-        $authRequestHeaders = new AuthorizationRequestHeaders($request);
-
-        if (!$authRequestHeaders->hasRoles()){
-            throw new ClientErrorException('Access denied.', 403);
-        }
-
-        return $authRequestHeaders;
     }
 
     /**
@@ -94,5 +85,15 @@ class PolicyValidator
         }
 
         return true;
+    }
+
+    /**
+     * @param Request $request
+     * @param Rule $rule
+     * @return bool
+     */
+    private function isRoleHasAccess(Request $request, Rule $rule): bool
+    {
+        return \in_array($rule->roleName(), $this->roleExtractor->userRoles($request), true);
     }
 }

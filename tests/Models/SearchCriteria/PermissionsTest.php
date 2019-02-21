@@ -8,7 +8,7 @@ use Infrastructure\Models\Auth\Rule;
 use Infrastructure\Services\BaseService;
 use PHPUnit\Framework\TestCase;
 
-class AuthTest extends TestCase
+class PermissionsTest extends TestCase
 {
     /**
      * @throws ClientErrorException

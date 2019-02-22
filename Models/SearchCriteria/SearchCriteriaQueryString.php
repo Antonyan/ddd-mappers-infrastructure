@@ -292,10 +292,10 @@ class SearchCriteriaQueryString extends SearchCriteria
         $values = explode(',', $value);
 
         if (count($values) == 2) {
-            $this->conditions[self::WHERE_GREATER_OR_EQUAL_SIGN][$field] = date('Y-m-d 00:00:00', strtotime($values[0]));
-            $this->conditions[self::WHERE_LESS_OR_EQUAL_SIGN][$field] = date('Y-m-d 23:59:59', strtotime($values[1]));
+            $this->conditions[self::WHERE_GREATER_OR_EQUAL_SIGN][$field] = date('Y-m-d H:i:s', strtotime($values[0]));
+            $this->conditions[self::WHERE_LESS_OR_EQUAL_SIGN][$field] = date('Y-m-d H:i:s', strtotime($values[1]));
         } else {
-            $this->conditions[self::WHERE_GREATER_OR_EQUAL_SIGN][$field] = date('Y-m-d 00:00:00', strtotime($values[0]));
+            $this->conditions[self::WHERE_GREATER_OR_EQUAL_SIGN][$field] = date('Y-m-d H:i:s', strtotime($values[0]));
         }
 
         return $this;

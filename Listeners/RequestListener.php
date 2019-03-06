@@ -20,7 +20,13 @@ class RequestListener
     {
         $validationRulesReader = new ValidationRulesReader($event->getController(), $event->getMethodName());
         $validator = new Validator($validationRulesReader->rules());
-        $validator->validate(array_merge($event->getRequest()->request->all(), $event->getRequest()->attributes->all()));
+        $validator->validate(
+            array_merge(
+                $event->getRequest()->request->all(),
+                $event->getRequest()->attributes->all(),
+                $event->getRequest()->query->all()
+            )
+        );
 
         $this->filterRequest($event, $validationRulesReader);
 

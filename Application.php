@@ -169,6 +169,11 @@ class Application extends HttpKernel
      */
     private function throwUncaughtInfrastructureException(Exception $exception)
     {
+        (new ApplicationLogService())->getLogger()->critical(
+            'Error: ' . $exception->getMessage(),
+            $exception->getTrace()
+        );
+
         if (getenv('ENV') == self::ENV_PROD) {
             throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, 'Internal server error');
         }

@@ -48,7 +48,7 @@ class ResponseFactory
 
     private function isAllowedContentType(string $contentType, $allowedContentType): bool
     {
-        return strpos($allowedContentType, $contentType) !== false;
+        return stripos($contentType, $allowedContentType) !== false;
     }
 
     /**

@@ -150,7 +150,7 @@ class SearchCriteriaQueryString extends SearchCriteria
         }
 
         $this->criteriaParsed = true;
-        
+
         return $this;
     }
 
@@ -199,7 +199,7 @@ class SearchCriteriaQueryString extends SearchCriteria
         }
 
         if (strpos($value, ',')) {
-            $this->addInCondition($field, explode(',', $value));
+            $this->addInCondition($field, $this->separateValue($value));
             return $this;
         }
 
@@ -289,7 +289,7 @@ class SearchCriteriaQueryString extends SearchCriteria
      */
     private function addDateCondition($field, $value) : SearchCriteria
     {
-        $values = explode(',', $value);
+        $values = $this->separateValue($value);
 
         if (count($values) == 2) {
             $this->conditions[self::WHERE_GREATER_OR_EQUAL_SIGN][$field] = date('Y-m-d H:i:s', strtotime($values[0]));
@@ -489,5 +489,14 @@ class SearchCriteriaQueryString extends SearchCriteria
         }
 
         $this->limit = $value;
+    }
+
+    /**
+     * @param string $value
+     * @return array
+     */
+    private function separateValue(string $value): array
+    {
+        return array_filter(explode(',', $value));
     }
 }

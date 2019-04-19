@@ -69,7 +69,7 @@ class Application extends HttpKernel
      * @throws Exception
      */
     public function __construct(RouteCollection $routes, ContainerBuilder $appContainer) {
-        $this->env = getenv('ENV') !== '' ? getenv('ENV') : 'unknown-env';
+        $this->env = getenv('ENV') ?: self::ENV_PROD;
         /** @var ContainerBuilder $container */
         $container = include __DIR__.'/config/appContainer.php';
         $container->merge($appContainer);

@@ -28,6 +28,7 @@ use Symfony\Component\Routing\RouteCollection;
 class Application extends HttpKernel
 {
     public const ENV_PROD = 'prod';
+    public const ENV_APPLICATION_NAME = 'APPLICATION_NAME';
 
     public const EVENT_BEFORE_DISPATCH_REQUEST = 'request';
 
@@ -52,12 +53,23 @@ class Application extends HttpKernel
     private $eventDispatcher;
 
     /**
+     * @var ApplicationLogService
+     */
+    private $logService;
+
+    /**
+     * @var string
+     */
+    private $env;
+
+    /**
      * Application constructor.
      * @param RouteCollection $routes
      * @param ContainerBuilder $appContainer
      * @throws Exception
      */
     public function __construct(RouteCollection $routes, ContainerBuilder $appContainer) {
+        $this->env = getenv('ENV') ?: self::ENV_PROD;
         /** @var ContainerBuilder $container */
         $container = include __DIR__.'/config/appContainer.php';
         $container->merge($appContainer);
@@ -66,6 +78,8 @@ class Application extends HttpKernel
         $this->controllerResolver = $container->get('controllerResolver');
         $this->argumentResolver = $container->get('argumentResolver');
         $this->eventDispatcher = $container->get('dispatcher');
+        $this->logService = $container->get('logService');
+
         parent::__construct(
             $this->eventDispatcher,
             $this->controllerResolver,
@@ -83,8 +97,8 @@ class Application extends HttpKernel
      * @throws Exception
      */
     public function handle(Request $request,
-        $type = HttpKernelInterface::MASTER_REQUEST,
-        $catch = true)
+                           $type = HttpKernelInterface::MASTER_REQUEST,
+                           $catch = true)
     {
         $this->matcher->getContext()->fromRequest($request);
 
@@ -119,14 +133,14 @@ class Application extends HttpKernel
             $response = $this->handleException($request, $type, $exception, $catch);
 
             if ($response->getStatusCode() === Response::HTTP_INTERNAL_SERVER_ERROR) {
-                (new ApplicationLogService())->getLogger()->critical(
+                $this->getApplicationLogService()->getLogger()->critical(
                     'Exception: ' . $exception->getMessage(),
                     (new ApplicationExceptionInfo($request, $controller[0], $controller[1]))->toArray()
                 );
             }
 
         } catch (\Error $error) {
-            (new ApplicationLogService())->getLogger()->critical(
+            $this->getApplicationLogService()->getLogger()->critical(
                 'Error: ' . $error->getMessage(),
                 (new ApplicationExceptionInfo($request, $controller[0], $controller[1]))->toArray()
             );
@@ -169,15 +183,23 @@ class Application extends HttpKernel
      */
     private function throwUncaughtInfrastructureException(Exception $exception)
     {
-        (new ApplicationLogService())->getLogger()->critical(
+        $this->getApplicationLogService()->getLogger()->critical(
             'Error: ' . $exception->getMessage(),
             $exception->getTrace()
         );
 
-        if (getenv('ENV') == self::ENV_PROD) {
+        if ($this->env === self::ENV_PROD) {
             throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, 'Internal server error');
         }
 
         throw $exception;
+    }
+
+    /**
+     * @return ApplicationLogService
+     */
+    private function getApplicationLogService(): ApplicationLogService
+    {
+        return $this->logService;
     }
 }

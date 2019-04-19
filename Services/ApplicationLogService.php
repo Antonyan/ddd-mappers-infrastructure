@@ -19,7 +19,7 @@ class ApplicationLogService extends LogService
      */
     public function __construct(string $applicationName, string $environment)
     {
-        $this->streamName = $applicationName . '-' . $environment . ' -application';
+        $this->streamName = $applicationName . '-' . $environment . '-application';
     }
 
     /**

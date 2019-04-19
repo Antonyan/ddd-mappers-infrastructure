@@ -55,7 +55,7 @@ class Application extends HttpKernel
     /**
      * @var ApplicationLogService
      */
-    private $applicationLogService;
+    private $logService;
 
     /**
      * @var string
@@ -78,6 +78,8 @@ class Application extends HttpKernel
         $this->controllerResolver = $container->get('controllerResolver');
         $this->argumentResolver = $container->get('argumentResolver');
         $this->eventDispatcher = $container->get('dispatcher');
+        $this->logService = $container->get('logService');
+
         parent::__construct(
             $this->eventDispatcher,
             $this->controllerResolver,
@@ -198,11 +200,6 @@ class Application extends HttpKernel
      */
     private function getApplicationLogService(): ApplicationLogService
     {
-        if (null === $this->applicationLogService) {
-            $applicationName = is_string(getenv(self::ENV_APPLICATION_NAME)) ? getenv(self::ENV_APPLICATION_NAME) : 'unknown-application';
-            $this->applicationLogService = new ApplicationLogService($applicationName, $this->env);
-        }
-
-        return $this->applicationLogService;
+        return $this->logService;
     }
 }

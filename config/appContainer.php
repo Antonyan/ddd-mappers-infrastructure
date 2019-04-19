@@ -3,6 +3,7 @@
 use Infrastructure\Application;
 
 use Infrastructure\Models\ContainerBuilder;
+use Infrastructure\Services\ApplicationLogService;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -59,5 +60,9 @@ $containerBuilder->register('application', Application::class)
         new Reference('dispatcher'),
     ])
 ;
+
+$containerBuilder->register('logService', ApplicationLogService::class)
+    ->addArgument(getenv('APPLICATION_NAME') ?: 'nameless-application')
+    ->addArgument(getenv('ENV') ?: 'nameless-env');
 
 return $containerBuilder;

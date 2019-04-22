@@ -1,5 +1,6 @@
 <?php
 
+use Infrastructure\Factories\LoggerFactory;
 use Infrastructure\Services\MySQLClient;
 
 $containerBuilder->register('db', \Infrastructure\Services\DbConnection::class)
@@ -11,3 +12,6 @@ $containerBuilder->register('MySqlClient', MySQLClient::class)
 $containerBuilder->register('RequestFactory', \Infrastructure\Models\Http\GuzzleRequestFactory::class);
 $containerBuilder->register('HttpClient', \Infrastructure\Models\Http\HttpClient::class);
 
+
+$containerBuilder->register('LoggerFactory', LoggerFactory::class)
+    ->addArgument(LOG_PATH);

@@ -14,4 +14,5 @@ $containerBuilder->register('HttpClient', \Infrastructure\Models\Http\HttpClient
 
 
 $containerBuilder->register('LoggerFactory', LoggerFactory::class)
-    ->addArgument(LOG_PATH, getenv('APPLICATION_NAME') ?: '');
+    ->addArgument(LOG_PATH)
+    ->addArgument(getenv('APPLICATION_NAME') ?: '');

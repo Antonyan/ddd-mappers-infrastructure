@@ -17,6 +17,6 @@ class SoapFaultException extends InternalException
         ?Throwable $previous = null,
         int $code = 0
     ) {
-        parent::__construct($message, $statusCode, $errorCode, $headers, $body, $previous, $code);
+        parent::__construct($message, $errorCode, $headers, $statusCode, $body, $previous, $code);
     }
 }

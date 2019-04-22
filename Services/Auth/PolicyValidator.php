@@ -2,7 +2,7 @@
 
 namespace Infrastructure\Services\Auth;
 
-use Infrastructure\Exceptions\ClientErrorException;
+use Infrastructure\Exceptions\ClientErrorForbiddenException;
 use Infrastructure\Exceptions\InternalException;
 use Infrastructure\Models\Auth\Permissions;
 use Infrastructure\Models\Auth\RoleExtractor;
@@ -10,7 +10,6 @@ use Infrastructure\Models\Auth\Rule;
 use Infrastructure\Models\ContainerBuilder;
 use Infrastructure\Services\BaseService;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class PolicyValidator
 {
@@ -46,7 +45,7 @@ class PolicyValidator
      * @param Request $request
      * @param BaseService $controller
      * @param string $method
-     * @throws ClientErrorException
+     * @throws ClientErrorForbiddenException
      * @throws InternalException
      */
     public function validate(Request $request, BaseService $controller, string $method) : void
@@ -62,7 +61,7 @@ class PolicyValidator
             }
         }
 
-        throw new ClientErrorException('Access denied. Please, check policy and role', 403);
+        throw new ClientErrorForbiddenException('Access denied. Please, check policy and role');
     }
 
     /**
@@ -77,7 +76,7 @@ class PolicyValidator
         foreach ($policies as $policy) {
 
             if (!$this->policies->has($policy)){
-                throw new InternalException('Can\'t find policy ' . $policy . '.', Response::HTTP_INTERNAL_SERVER_ERROR);
+                throw new InternalException('Can\'t find policy ' . $policy . '.');
             }
 
             if ($this->policies->get($policy)->check($request) === false) {

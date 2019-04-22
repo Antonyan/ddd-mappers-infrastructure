@@ -2,12 +2,8 @@
 
 namespace Infrastructure\Models;
 
-use Doctrine\Common\Annotations\AnnotationException;
-use Infrastructure\Exceptions\InfrastructureException;
 use Infrastructure\Exceptions\ValidationException;
-use Infrastructure\Services\BaseService;
-use ReflectionException;
-use Symfony\Component\Validator\Exception\ValidatorException;
+use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Validation;
 
 class Validator
@@ -37,25 +33,22 @@ class Validator
         }
 
         $validator = Validation::createValidator();
-
-        $errors = [];
+        $errorsMap = new StringMap();
 
         foreach ((new ValidationRulesTranslator())->translate($this->rules) as $item) {
-
             if (!array_key_exists($item->getName(), $dataForValidation)){
                 $dataForValidation[$item->getName()] = null;
             }
 
-            $error = $validator->validate($dataForValidation[$item->getName()], $item->getConstraints());
-
-            if (\count($error)) {
-                $errors[] = new ValidationError($item->getName(), $error);
+            /** @var ConstraintViolation $error */
+            $errors = $validator->validate($dataForValidation[$item->getName()], $item->getConstraints());
+            foreach ($errors as $error) {
+                $errorsMap->mergeIfExist($item->getName(), $error->getMessage());
             }
         }
 
-
-        if (\count($errors)){
-            throw new ValidationException('Invalid request parameters', $errors);
+        if (\count($errorsMap)){
+            throw new ValidationException('Invalid request parameters', $errorsMap);
         }
     }
 }

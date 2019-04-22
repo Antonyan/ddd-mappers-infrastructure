@@ -1,18 +1,18 @@
 <?php
 namespace Infrastructure\Exceptions;
 
+use Infrastructure\Models\StringMap;
 use Symfony\Component\HttpFoundation\Response;
 
 class ValidationException extends InternalException
 {
     /**
      * ValidationException constructor.
-     * @param string $message
-     * @param int $errorCode
-     * @param array $data
+     * @param string    $message
+     * @param StringMap $data
      */
-    public function __construct(string $message, array $data = [], int $errorCode = self::VALIDATION_ERROR_CODE)
+    public function __construct(string $message, StringMap $data = null)
     {
-        parent::__construct($message, Response::HTTP_BAD_REQUEST, $errorCode, [], $data);
+        parent::__construct($message, self::VALIDATION_ERROR_CODE, $data, Response::HTTP_BAD_REQUEST);
     }
 }

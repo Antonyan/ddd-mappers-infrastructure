@@ -2,34 +2,33 @@
 
 namespace Infrastructure\Services;
 
-use Infrastructure\Models\Logging\CloudWatchLoggingRegistry;
-use Infrastructure\Models\Logging\FileLoggingRegistry;
+use Infrastructure\Factories\LoggerFactory;
 
 class ApplicationLogService extends LogService
 {
     /**
      * @var string
      */
-    private $streamName;
+    private $loggerFactory;
 
     /**
      * ApplicationLogService constructor.
-     * @param string $applicationName
-     * @param string $environment
+     * @param LoggerFactory $loggerFactory
      */
-    public function __construct(string $applicationName, string $environment)
+    public function __construct(LoggerFactory $loggerFactory)
     {
-        $this->streamName = $applicationName . '-' . $environment . '-application';
+        $this->loggerFactory = $loggerFactory;
     }
 
     /**
      * @return array
+     * @throws \Infrastructure\Exceptions\InfrastructureException
      */
     protected function loggersMap(): array
     {
         return [
-            self::LOG_TO_FILE => function () {return (new FileLoggingRegistry())->logger(LOG_PATH . $this->streamName . '.log', 'application');},
-            self::LOG_TO_CLOUD_WATCH => function () {return (new CloudWatchLoggingRegistry())->logger('php-logs', $this->streamName, 'core');},
+            self::LOG_TO_FILE => $this->loggerFactory->create(LoggerFactory::FILE, 'application'),
+            self::LOG_TO_CLOUD_WATCH => $this->loggerFactory->create(LoggerFactory::CLOUD_WATCH, 'application'),
         ];
     }
 }

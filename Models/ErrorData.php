@@ -2,7 +2,7 @@
 
 namespace Infrastructure\Models;
 
-class StringMap implements \Countable
+class ErrorData implements \Countable
 {
     /**
      * @var array
@@ -26,9 +26,9 @@ class StringMap implements \Countable
     /**
      * @param string $key
      * @param string $value
-     * @return StringMap
+     * @return ErrorData
      */
-    public function add(string $key, string $value): StringMap
+    public function add(string $key, string $value): ErrorData
     {
         $this->collection[$key] = $value;
         return $this;
@@ -36,11 +36,11 @@ class StringMap implements \Countable
 
     /**
      * @param array $data An associative array in format [string => string]
-     * @return StringMap
+     * @return ErrorData
      */
-    public function addAll(array $data): StringMap
+    public function addAll(array $data): ErrorData
     {
-        array_walk($data, 'add');
+        array_walk($data, [$this, 'add']);
         return $this;
     }
 
@@ -71,9 +71,9 @@ class StringMap implements \Countable
      * @param string $key
      * @param string $value
      * @param string $glue
-     * @return StringMap
+     * @return ErrorData
      */
-    public function mergeIfExist(string $key, string $value, string $glue = ';'): StringMap
+    public function mergeIfExist(string $key, string $value, string $glue = ';'): ErrorData
     {
         if (!$this->has($key)) {
             return $this->add($key, $value);

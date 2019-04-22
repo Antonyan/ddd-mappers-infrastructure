@@ -2,13 +2,13 @@
 
 namespace Infrastructure\Exceptions;
 
-use Infrastructure\Models\StringMap;
+use Infrastructure\Models\ErrorData;
 use Throwable;
 
 class InternalException extends \Exception implements HttpExceptionInterface
 {
     /**
-     * @var StringMap
+     * @var ErrorData
      */
     protected $headers;
 
@@ -18,7 +18,7 @@ class InternalException extends \Exception implements HttpExceptionInterface
     protected $statusCode;
 
     /**
-     * @var StringMap
+     * @var ErrorData
      */
     protected $body;
 
@@ -31,18 +31,18 @@ class InternalException extends \Exception implements HttpExceptionInterface
      * InternalException constructor.
      * @param string         $message
      * @param int            $errorCode
-     * @param StringMap|null $body
+     * @param ErrorData|null $body
      * @param int            $statusCode
-     * @param StringMap|null $headers
+     * @param ErrorData|null $headers
      * @param Throwable|null $previous
      * @param int            $code
      */
     public function __construct(
         string $message = '',
         int $errorCode = self::DEFAULT_ERROR_CODE,
-        ?StringMap $body = null,
+        ?ErrorData $body = null,
         int $statusCode = 500,
-        ?StringMap $headers = null,
+        ?ErrorData $headers = null,
         Throwable $previous = null,
         int $code = 0
     ) {

@@ -1,7 +1,7 @@
 <?php
 namespace Infrastructure\Exceptions;
 
-use Infrastructure\Models\StringMap;
+use Infrastructure\Models\ErrorData;
 use Symfony\Component\HttpFoundation\Response;
 
 class ClientErrorException extends InternalException
@@ -10,13 +10,13 @@ class ClientErrorException extends InternalException
      * ClientErrorException constructor.
      * @param string    $message
      * @param int       $errorCode
-     * @param StringMap $data
+     * @param ErrorData $data
      * @param int       $statusCode
      */
     public function __construct(
         string    $message,
         int       $errorCode = self::DEFAULT_ERROR_CODE,
-        StringMap $data = null,
+        ErrorData $data = null,
         int       $statusCode = Response::HTTP_BAD_REQUEST
     ) {
         parent::__construct($message, $errorCode, $data, $statusCode);

@@ -7,7 +7,7 @@ use GuzzleHttp\Exception\RequestException;
 use Infrastructure\Exceptions\HttpExceptionInterface;
 use Infrastructure\Exceptions\InfrastructureException;
 use Infrastructure\Exceptions\InternalException;
-use Infrastructure\Models\StringMap;
+use Infrastructure\Models\ErrorData;
 use Infrastructure\Models\Http\Response\ResponseFactory;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
@@ -45,9 +45,9 @@ class HttpClient
             throw new InternalException(
                 $exception->getMessage(),
                 HttpExceptionInterface::DEFAULT_ERROR_CODE,
-                (new StringMap())->add('content', $response->getBody()->getContents()),
+                (new ErrorData())->add('content', $response->getBody()->getContents()),
                 $response->getStatusCode(),
-                (new StringMap())->addAll($this->getResponseHeadersFormatted($request->getHeaders())),
+                (new ErrorData())->addAll($this->getResponseHeadersFormatted($request->getHeaders())),
                 $exception,
                 $exception->getCode()
             );
@@ -67,6 +67,6 @@ class HttpClient
             $headersFormatted[$name] = implode(", ", $values);
         }
 
-        return $headers;
+        return $headersFormatted;
     }
 }

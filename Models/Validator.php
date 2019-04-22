@@ -33,7 +33,7 @@ class Validator
         }
 
         $validator = Validation::createValidator();
-        $errorsMap = new StringMap();
+        $errorsMap = new ErrorData();
 
         foreach ((new ValidationRulesTranslator())->translate($this->rules) as $item) {
             if (!array_key_exists($item->getName(), $dataForValidation)){

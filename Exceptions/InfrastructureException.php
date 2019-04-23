@@ -2,6 +2,7 @@
 
 namespace Infrastructure\Exceptions;
 
+use Infrastructure\Models\ErrorData;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
@@ -12,8 +13,8 @@ class InfrastructureException extends InternalException
      * @param string $message
      * @param null|Throwable $previous
      */
-    public function __construct($message, Throwable $previous = null)
+    public function __construct(string $message, Throwable $previous = null)
     {
-        parent::__construct($message, Response::HTTP_INTERNAL_SERVER_ERROR, self::DEFAULT_ERROR_CODE, [], [], $previous);
+        parent::__construct($message, self::DEFAULT_ERROR_CODE, new ErrorData(), Response::HTTP_INTERNAL_SERVER_ERROR, new ErrorData(), $previous);
     }
 }

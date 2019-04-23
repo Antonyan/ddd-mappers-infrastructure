@@ -2,12 +2,13 @@
 
 namespace Infrastructure\Exceptions;
 
+use Infrastructure\Models\ErrorData;
 use Throwable;
 
 class InternalException extends \Exception implements HttpExceptionInterface
 {
     /**
-     * @var array
+     * @var ErrorData
      */
     protected $headers;
 
@@ -17,7 +18,7 @@ class InternalException extends \Exception implements HttpExceptionInterface
     protected $statusCode;
 
     /**
-     * @var array
+     * @var ErrorData
      */
     protected $body;
 
@@ -28,16 +29,23 @@ class InternalException extends \Exception implements HttpExceptionInterface
 
     /**
      * InternalException constructor.
-     * @param string $message
-     * @param $statusCode
-     * @param int $errorCode
-     * @param array $headers
-     * @param array $body
+     * @param string         $message
+     * @param int            $errorCode
+     * @param ErrorData|null $body
+     * @param int            $statusCode
+     * @param ErrorData|null $headers
      * @param Throwable|null $previous
-     * @param int $code
+     * @param int            $code
      */
-    public function __construct($message = '', $statusCode, $errorCode = self::DEFAULT_ERROR_CODE, $headers = [], $body = [],  Throwable $previous = null, $code = 0)
-    {
+    public function __construct(
+        string $message = '',
+        int $errorCode = self::DEFAULT_ERROR_CODE,
+        ?ErrorData $body = null,
+        int $statusCode = 500,
+        ?ErrorData $headers = null,
+        Throwable $previous = null,
+        int $code = 0
+    ) {
         $this->statusCode = $statusCode;
         $this->headers = $headers;
         $this->body = $body;
@@ -56,9 +64,9 @@ class InternalException extends \Exception implements HttpExceptionInterface
     /**
      * @return array
      */
-    public function getHeaders()
+    public function getHeaders(): array
     {
-        return $this->headers;
+        return $this->headers === null ? [] : $this->headers->toArray();
     }
 
     /**
@@ -66,7 +74,7 @@ class InternalException extends \Exception implements HttpExceptionInterface
      */
     public function getBody(): array
     {
-        return $this->body;
+        return $this->body === null ? [] : $this->body->toArray();
     }
 
     /**
@@ -76,6 +84,4 @@ class InternalException extends \Exception implements HttpExceptionInterface
     {
         return $this->errorCode;
     }
-
-
 }

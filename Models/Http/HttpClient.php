@@ -7,6 +7,7 @@ use GuzzleHttp\Exception\RequestException;
 use Infrastructure\Exceptions\HttpExceptionInterface;
 use Infrastructure\Exceptions\InfrastructureException;
 use Infrastructure\Exceptions\InternalException;
+use Infrastructure\Models\ErrorData;
 use Infrastructure\Models\Http\Response\ResponseFactory;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
@@ -33,7 +34,6 @@ class HttpClient
      * @param RequestInterface $request
      * @return ResponseInterface
      * @throws InternalException
-     * @throws Response\ResponseContentTypeException
      */
     public function send(RequestInterface $request): ResponseInterface
     {
@@ -44,10 +44,10 @@ class HttpClient
 
             throw new InternalException(
                 $exception->getMessage(),
-                $response->getStatusCode(),
                 HttpExceptionInterface::DEFAULT_ERROR_CODE,
-                $response->getHeaders(),
-                $this->getResponseBodyFormated($response),
+                (new ErrorData())->add('content', $response->getBody()->getContents()),
+                $response->getStatusCode(),
+                (new ErrorData())->addAll($this->getResponseHeadersFormatted($request->getHeaders())),
                 $exception,
                 $exception->getCode()
             );
@@ -57,21 +57,16 @@ class HttpClient
     }
 
     /**
-     * @param PsrResponseInterface $response
-     * @return array|mixed
+     * @param array $headers
+     * @return array
      */
-    private function getResponseBodyFormated(PsrResponseInterface $response)
+    private function getResponseHeadersFormatted(array $headers): array
     {
-        $contentType = $response->getHeader('Content-Type')[0] ?? '';
-
-        if (empty($contentType)) {
-            return [$response->getBody()->getContents()];
+        $headersFormatted = [];
+        foreach ($headers as $name => $values) {
+            $headersFormatted[$name] = implode(", ", $values);
         }
 
-        if (strpos(ResponseInterface::CONTENT_TYPE_JSON, $contentType)) {
-            return json_decode($response->getBody()->getContents(), true);
-        }
-
-        return [$response->getBody()->getContents()];
+        return $headersFormatted;
     }
 }

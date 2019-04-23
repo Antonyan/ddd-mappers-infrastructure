@@ -9,6 +9,7 @@ use Infrastructure\Exceptions\ResourceNotFoundException as InternalResourceNotFo
 
 use Infrastructure\Models\ContainerBuilder;
 use Infrastructure\Models\ApplicationExceptionInfo;
+use Infrastructure\Models\ErrorData;
 use Infrastructure\Services\ApplicationLogService;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
@@ -119,7 +120,7 @@ class Application extends HttpKernel
             $response = $this->handleException(
                 $request,
                 $type,
-                new InternalException('Method Not Allowed!', Response::HTTP_METHOD_NOT_ALLOWED),
+                new InternalException('Method Not Allowed!', InternalException::DEFAULT_ERROR_CODE, new ErrorData(), Response::HTTP_METHOD_NOT_ALLOWED),
                 $catch
             );
         } catch (ResourceNotFoundException $exception) {

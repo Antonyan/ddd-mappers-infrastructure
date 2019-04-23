@@ -1,6 +1,7 @@
 <?php
 namespace Infrastructure\Exceptions;
 
+use Infrastructure\Models\ErrorData;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
@@ -8,13 +9,13 @@ class ResourceNotFoundException extends InternalException
 {
     /**
      * ResourceNotFoundException constructor.
-     * @param $message
-     * @param array $data
-     * @param int $errorCode
+     * @param string         $message
+     * @param int            $errorCode
+     * @param ErrorData      $data
      * @param Throwable|null $previous
      */
-    public function __construct($message, $data = [], $errorCode = self::DEFAULT_ERROR_CODE, Throwable $previous = null)
+    public function __construct(string $message, int $errorCode = self::DEFAULT_ERROR_CODE, ErrorData $data = null, Throwable $previous = null)
     {
-        parent::__construct($message, Response::HTTP_NOT_FOUND, $errorCode, [], $data, $previous);
+        parent::__construct($message, $errorCode, $data, Response::HTTP_NOT_FOUND, new ErrorData(), $previous);
     }
 }

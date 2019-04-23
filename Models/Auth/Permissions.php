@@ -2,7 +2,7 @@
 
 namespace Infrastructure\Models\Auth;
 
-use Infrastructure\Exceptions\ClientErrorException;
+use Infrastructure\Exceptions\ClientErrorForbiddenException;
 use Infrastructure\Services\BaseService;
 
 class Permissions
@@ -25,7 +25,7 @@ class Permissions
      * @param BaseService $controller
      * @param string $method
      * @return array
-     * @throws ClientErrorException
+     * @throws ClientErrorForbiddenException
      */
     public function policies(BaseService $controller, string $method) : array
     {
@@ -33,7 +33,7 @@ class Permissions
 
         foreach ($this->validationMap() as $check) {
             if ($check($controllerName, $method) === true){
-                throw new ClientErrorException('Access denied.', 403);
+                throw new ClientErrorForbiddenException('Access denied');
             }
         }
 

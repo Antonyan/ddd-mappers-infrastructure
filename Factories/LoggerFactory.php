@@ -83,7 +83,7 @@ class LoggerFactory
     /**
      * @return string
      */
-    protected function getStreamName(): string
+    public function getStreamName(): string
     {
         return $this->applicationName . '-' . getenv('ENV');
     }
@@ -91,7 +91,7 @@ class LoggerFactory
     /**
      * @return string
      */
-    protected function getGroupName(): string
+    public function getGroupName(): string
     {
         return 'php-logs';
     }

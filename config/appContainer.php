@@ -62,12 +62,15 @@ $containerBuilder->register('application', Application::class)
     ])
 ;
 
+$applicationName = getenv('APPLICATION_NAME') ?: '';
+
 $containerBuilder->register('LoggerFactory', LoggerFactory::class)
     ->addArgument(LOG_PATH)
-    ->addArgument(getenv('APPLICATION_NAME') ?: '');
+    ->addArgument($applicationName);
 
 $containerBuilder->register('logService', ApplicationLogService::class)
-    ->addArgument(new Reference('LoggerFactory'));
+    ->addArgument(new Reference('LoggerFactory'))
+    ->addArgument($applicationName);
 
 
 return $containerBuilder;

@@ -3,6 +3,8 @@
 namespace Infrastructure\Services;
 
 use Infrastructure\Factories\LoggerFactory;
+use Infrastructure\Models\Logging\CloudWatch;
+use Infrastructure\Models\Logging\Logger;
 
 class ApplicationLogService extends LogService
 {
@@ -12,12 +14,18 @@ class ApplicationLogService extends LogService
     private $loggerFactory;
 
     /**
+     * @var string
+     */
+    private $applicationName;
+
+    /**
      * ApplicationLogService constructor.
      * @param LoggerFactory $loggerFactory
      */
-    public function __construct(LoggerFactory $loggerFactory)
+    public function __construct(LoggerFactory $loggerFactory, string $applicationName)
     {
         $this->loggerFactory = $loggerFactory;
+        $this->applicationName = $applicationName;
     }
 
     /**
@@ -28,7 +36,7 @@ class ApplicationLogService extends LogService
     {
         return [
             self::LOG_TO_FILE => $this->loggerFactory->create(LoggerFactory::FILE, 'application'),
-            self::LOG_TO_CLOUD_WATCH => $this->loggerFactory->create(LoggerFactory::CLOUD_WATCH, 'application'),
+            self::LOG_TO_CLOUD_WATCH => new Logger('application', [(new CloudWatch())->handler($this->loggerFactory->getGroupName(), $this->loggerFactory->getStreamName() . '-application')])
         ];
     }
 }

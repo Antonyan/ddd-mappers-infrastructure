@@ -36,7 +36,9 @@ class ApplicationLogService extends LogService
     {
         return [
             self::LOG_TO_FILE => $this->loggerFactory->create(LoggerFactory::FILE, 'application'),
-            self::LOG_TO_CLOUD_WATCH => new Logger('application', [(new CloudWatch())->handler($this->loggerFactory->getGroupName(), $this->loggerFactory->getStreamName() . '-application')])
+            self::LOG_TO_CLOUD_WATCH => function() {
+                return new Logger('application', [(new CloudWatch())->handler($this->loggerFactory->getGroupName(), $this->loggerFactory->getStreamName() . '-application')]);
+            },
         ];
     }
 }

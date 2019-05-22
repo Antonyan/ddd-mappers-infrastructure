@@ -1,5 +1,7 @@
 <?php
 
+use Infrastructure\Factories\CloudWatchLogFactory;
+use Infrastructure\Factories\FileLogFactory;
 use Infrastructure\Factories\LoggerFactory;
 use Infrastructure\Services\MySQLClient;
 
@@ -14,5 +16,10 @@ $containerBuilder->register('HttpClient', \Infrastructure\Models\Http\HttpClient
 
 
 $containerBuilder->register('LoggerFactory', LoggerFactory::class)
-    ->addArgument(LOG_PATH)
-    ->addArgument(getenv('APPLICATION_NAME') ?: '');
+    ->addArgument(new FileLogFactory(LOG_PATH))
+    ->addArgument(
+        new CloudWatchLogFactory(
+            getenv('APPLICATION_NAME') ?: '',
+            getenv('ENV')?: ''
+        )
+    );

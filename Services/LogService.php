@@ -3,21 +3,19 @@
 namespace Infrastructure\Services;
 
 use Infrastructure\Exceptions\InfrastructureException;
+use Infrastructure\Factories\LoggerFactory;
 use Infrastructure\Models\Logging\LoggerNullObject;
 use Psr\Log\LoggerInterface;
 use ReflectionException;
 
 abstract class LogService extends BaseService
 {
-    protected const LOG_TO_FILE = 'file';
-    protected const LOG_TO_CLOUD_WATCH = 'cloudWatch';
-
     /**
      * @return LoggerInterface
      * @throws InfrastructureException
      * @throws ReflectionException
      */
-    public function getLogger()
+    public function getLogger() : LoggerInterface
     {
         if (!$this->config()->loggingType()){
             return new LoggerNullObject();
@@ -27,8 +25,18 @@ abstract class LogService extends BaseService
             throw new InfrastructureException('Unknown logging type ' . $this->config()->loggingType());
         }
 
-        return $this->loggersMap()[$this->config()->loggingType()]();
+        return $this->getLoggerFactory()->create($this->config()->loggingType(), $this->getChannelName());
     }
 
-    abstract protected function loggersMap() : array;
+    abstract protected function getChannelName() : string;
+
+    /**
+     * @return LoggerFactory
+     * @throws InfrastructureException
+     * @throws ReflectionException
+     */
+    protected function getLoggerFactory() : LoggerFactory
+    {
+        return $this->config()->get('LoggerFactory');
+    }
 }

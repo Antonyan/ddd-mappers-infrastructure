@@ -64,14 +64,11 @@ To use logging you should create Service (example):
 class SomeLogger extends LogService
 {
     /**
-     * @return array
+     * @return string
      */
-    protected function loggersMap(): array
+    protected function getChannelName(): string
     {
-        return [
-            self::LOG_TO_FILE => function () {return (new FileLoggingRegistry())->logger(LOG_PATH . 'someLog.log', 'channelName');},
-            self::LOG_TO_CLOUD_WATCH => function () {return (new CloudWatchLoggingRegistry())->logger('groupName', 'streamName', 'channelName');},
-        ];
+        return "specific-channel-name";
     }
 
 }

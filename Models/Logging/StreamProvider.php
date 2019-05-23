@@ -9,13 +9,8 @@ use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
-class Stream
+class StreamProvider
 {
-    /**
-     * @var AbstractProcessingHandler
-     */
-    private $handler;
-
     /**
      * @param $fileName
      * @return AbstractProcessingHandler
@@ -23,18 +18,11 @@ class Stream
      */
     public function handler($fileName): AbstractProcessingHandler
     {
-        if ($this->handler !== null) {
-            return $this->handler;
-        }
-
         try {
-            $handler = new StreamHandler($fileName, Logger::INFO);
+            return (new StreamHandler($fileName, Logger::INFO))
+                ->setFormatter(new LineFormatter(null, null, false, true));
         } catch (InvalidArgumentException $exception) {
             throw new InfrastructureException('Can\'t initialize CloudWatch ' . $exception->getMessage());
         }
-
-        $this->handler = $handler->setFormatter(new LineFormatter(null, null, false, true));
-
-        return $this->handler;
     }
 }

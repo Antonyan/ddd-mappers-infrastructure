@@ -2,97 +2,50 @@
 
 namespace Infrastructure\Factories;
 
-
 use Infrastructure\Exceptions\InfrastructureException;
-use Infrastructure\Models\Logging\CloudWatchLoggingRegistry;
-use Infrastructure\Models\Logging\FileLoggingRegistry;
+use Psr\Log\LoggerInterface;
 
 class LoggerFactory
 {
     public const FILE = 'file';
     public const CLOUD_WATCH = 'cloudWatch';
-
-    public const ALLOWED_LOGGER_TYPES = [
-        self::FILE,
-        self::CLOUD_WATCH,
-    ];
+    public const SYSLOG = 'syslog';
+    public const ERROR_LOG = 'errorLog';
 
     /**
-     * @var FileLoggingRegistry
+     * @var LogFactory[]
      */
-    private $fileLoggingRegistry;
+    private $logFactoryMap;
 
     /**
-     * @var CloudWatchLoggingRegistry
+     * @var array
      */
-    private $cloudWatchLoggingRegistry;
-
-    /**
-     * @var string
-     */
-    private $logPath;
-
-    /**
-     * @var string
-     */
-    private $applicationName;
+    private $loggers = [];
 
     /**
      * LoggerFactory constructor.
-     * @param string $logPath
-     * @param string $applicationName
+     * @param array $logFactoryMap
      */
-    public function __construct(string $logPath, string $applicationName = '')
-    {
-        $this->fileLoggingRegistry = new FileLoggingRegistry();
-        $this->cloudWatchLoggingRegistry = new CloudWatchLoggingRegistry();
-        $this->logPath = $logPath;
-        $this->applicationName = $applicationName;
+    public function __construct(array $logFactoryMap) {
+        $this->logFactoryMap = $logFactoryMap;
     }
 
     /**
      * @param string $type
      * @param string $channelName
-     * @return callable
+     * @return LoggerInterface
      * @throws InfrastructureException
      */
-    public function create(string $type, string $channelName): callable
+    public function create(string $type, string $channelName): LoggerInterface
     {
-        if (!in_array($type, static::ALLOWED_LOGGER_TYPES, true)) {
+        if (!isset($this->logFactoryMap[$type])) {
             throw new InfrastructureException('A logger for the needed type( "' . $type . '" ) is not found');
         }
 
-        return function() use ($type, $channelName) { return $this->getLoggersMap()[$type]($channelName);};
-    }
+        if (isset($this->loggers[$type][$channelName])) {
+            return $this->loggers[$type][$channelName];
+        }
 
-    /**
-     * @return array
-     */
-    protected function getLoggersMap(): array
-    {
-        return [
-            self::FILE => function(string $channelName) {
-                return $this->fileLoggingRegistry->logger($this->logPath . $channelName . 'Log.log', $channelName);
-            },
-            self::CLOUD_WATCH => function(string $channelName) {
-                return $this->cloudWatchLoggingRegistry->logger($this->getGroupName(), $this->getStreamName(), $channelName);
-            },
-        ];
-    }
-
-    /**
-     * @return string
-     */
-    public function getStreamName(): string
-    {
-        return $this->applicationName . '-' . getenv('ENV');
-    }
-
-    /**
-     * @return string
-     */
-    public function getGroupName(): string
-    {
-        return 'php-logs';
+        return $this->logFactoryMap[$type]->create($channelName);
     }
 }

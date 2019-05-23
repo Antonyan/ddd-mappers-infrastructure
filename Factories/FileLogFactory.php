@@ -4,20 +4,24 @@ namespace Infrastructure\Factories;
 
 use Exception;
 use Infrastructure\Models\Logging\Logger;
-use Infrastructure\Models\Logging\Stream;
+use Infrastructure\Models\Logging\StreamProvider;
 use Psr\Log\LoggerInterface;
 
 class FileLogFactory implements LogFactory
 {
     private $logPath;
 
+    private $provider;
+
     /**
      * FileLogFactory constructor.
      * @param string $logPath
+     * @param StreamProvider $provider
      */
-    public function __construct(string $logPath)
+    public function __construct(string $logPath, StreamProvider $provider)
     {
         $this->logPath = $logPath;
+        $this->provider = $provider;
     }
 
     /**
@@ -27,7 +31,7 @@ class FileLogFactory implements LogFactory
      */
     public function create(string $channel) : LoggerInterface
     {
-        return new Logger($channel, [(new Stream())->handler($this->buildFileName($channel))]);
+        return new Logger($channel, [$this->provider->handler($this->buildFileName($channel))]);
     }
 
     private function buildFileName(string $channel)

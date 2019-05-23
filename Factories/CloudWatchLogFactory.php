@@ -2,7 +2,7 @@
 
 namespace Infrastructure\Factories;
 
-use Infrastructure\Models\Logging\CloudWatch;
+use Infrastructure\Models\Logging\CloudWatchProvider;
 use Infrastructure\Models\Logging\Logger;
 use Psr\Log\LoggerInterface;
 
@@ -19,14 +19,21 @@ class CloudWatchLogFactory implements LogFactory
     private $environment;
 
     /**
+     * @var CloudWatchProvider
+     */
+    private $provider;
+
+    /**
      * CloudWatchLogFactory constructor.
      * @param string $applicationName
      * @param string $environment
+     * @param CloudWatchProvider $provider
      */
-    public function __construct(string $applicationName, string $environment)
+    public function __construct(string $applicationName, string $environment, CloudWatchProvider $provider)
     {
         $this->applicationName = $applicationName;
         $this->environment = $environment;
+        $this->provider = $provider;
     }
 
     /**
@@ -36,7 +43,7 @@ class CloudWatchLogFactory implements LogFactory
      */
     public function create(string $channel) : LoggerInterface
     {
-        return new Logger($channel, [(new CloudWatch())->handler($this->getGroupName(), $this->getStreamName())]);
+        return new Logger($channel, [$this->provider->handler($this->getGroupName(), $this->getStreamName())]);
     }
 
     /**

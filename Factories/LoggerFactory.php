@@ -22,19 +22,38 @@ class LoggerFactory
      */
     private $cloudWatchLogFactory;
 
+    /**
+     * @var ErrorLogFactory
+     */
+    private $errorLogFactory;
+
+    /**
+     * @var SysLogFactory
+     */
+    private $sysLogFactory;
+
+    /**
+     * @var array
+     */
     private $loggers = [];
 
     /**
      * LoggerFactory constructor.
      * @param FileLogFactory $fileLogFactory
      * @param CloudWatchLogFactory $cloudWatchLogFactory
+     * @param ErrorLogFactory $errorLogFactory
+     * @param SysLogFactory $sysLogFactory
      */
     public function __construct(
         FileLogFactory $fileLogFactory,
-        CloudWatchLogFactory $cloudWatchLogFactory
+        CloudWatchLogFactory $cloudWatchLogFactory,
+        ErrorLogFactory $errorLogFactory,
+        SysLogFactory $sysLogFactory
     ) {
         $this->fileLogFactory = $fileLogFactory;
         $this->cloudWatchLogFactory = $cloudWatchLogFactory;
+        $this->sysLogFactory = $sysLogFactory;
+        $this->errorLogFactory = $errorLogFactory;
     }
 
     /**
@@ -65,6 +84,8 @@ class LoggerFactory
         return [
             self::FILE => $this->fileLogFactory,
             self::CLOUD_WATCH => $this->cloudWatchLogFactory,
+            self::SYSLOG => $this->sysLogFactory,
+            self::ERROR_LOG => $this->errorLogFactory
         ];
     }
 }

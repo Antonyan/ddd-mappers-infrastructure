@@ -9,14 +9,9 @@ use Maxbanton\Cwh\Handler\CloudWatch as ExternalCloudWatch;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\AbstractProcessingHandler;
 
-class CloudWatch
+class CloudWatchProvider
 {
     private const ONE_MONTH = 30;
-
-    /**
-     * @var AbstractProcessingHandler
-     */
-    private $handler;
 
     private $requiredAWSParams = [
         'AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'
@@ -31,19 +26,12 @@ class CloudWatch
      */
     public function handler($groupName, $streamName, $retentionDays = self::ONE_MONTH) : AbstractProcessingHandler
     {
-        if ($this->handler !== null) {
-            return $this->handler;
-        }
-
         try {
-            $handler = new ExternalCloudWatch(new CloudWatchLogsClient($this->awsParams()), $groupName, $streamName, $retentionDays);
+            return (new ExternalCloudWatch(new CloudWatchLogsClient($this->awsParams()), $groupName, $streamName, $retentionDays))
+                ->setFormatter(new LineFormatter(null, null, false, true));
         } catch (InvalidArgumentException $exception){
             throw new InfrastructureException('Can\'t initialize CloudWatch ' . $exception->getMessage());
         }
-
-        $this->handler = $handler->setFormatter(new LineFormatter(null, null, false, true));
-
-        return $this->handler;
     }
 
     /**

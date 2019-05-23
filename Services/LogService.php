@@ -37,6 +37,6 @@ abstract class LogService extends BaseService
      */
     protected function getLoggerFactory() : LoggerFactory
     {
-        return $this->config()->get('LoggerFactory');
+        return $this->container()->get('LoggerFactory');
     }
 }

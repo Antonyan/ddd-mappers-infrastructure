@@ -2,7 +2,6 @@
 
 use Infrastructure\Application;
 
-use Infrastructure\Factories\LoggerFactory;
 use Infrastructure\Models\ContainerBuilder;
 use Infrastructure\Services\ApplicationLogService;
 use Symfony\Component\DependencyInjection\Reference;
@@ -62,8 +61,7 @@ $containerBuilder->register('application', Application::class)
     ])
 ;
 
-$containerBuilder->register('logService', ApplicationLogService::class)
-    ->addArgument(new Reference('LoggerFactory'));
+$containerBuilder->register('logService', ApplicationLogService::class);
 
 
 return $containerBuilder;

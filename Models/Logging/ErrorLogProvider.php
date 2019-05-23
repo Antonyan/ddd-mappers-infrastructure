@@ -4,6 +4,7 @@ namespace Infrastructure\Models\Logging;
 
 use Infrastructure\Exceptions\InfrastructureException;
 use InvalidArgumentException;
+use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Handler\ErrorLogHandler;
 
@@ -25,7 +26,8 @@ class ErrorLogProvider
         }
 
         try {
-           return $this->handler = new ErrorLogHandler();
+           return $this->handler = (new ErrorLogHandler())
+               ->setFormatter(new LineFormatter(null, null, false, true));
         } catch (InvalidArgumentException $exception) {
             throw new InfrastructureException('Can\'t initialize Error log handler :  ' . $exception->getMessage());
         }

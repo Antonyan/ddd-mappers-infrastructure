@@ -4,6 +4,7 @@ namespace Infrastructure\Models\Logging;
 
 use Infrastructure\Exceptions\InfrastructureException;
 use InvalidArgumentException;
+use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Handler\SyslogHandler;
@@ -36,7 +37,8 @@ class SysLogProvider
         }
 
         try {
-           return $this->handler = new SyslogHandler($this->ident);
+           return $this->handler = (new SyslogHandler($this->ident))
+               ->setFormatter(new LineFormatter(null, null, false, true));
         } catch (InvalidArgumentException $exception) {
             throw new InfrastructureException('Can\'t initialize Sys log handler :  ' . $exception->getMessage());
         }

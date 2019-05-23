@@ -13,24 +13,9 @@ class LoggerFactory
     public const ERROR_LOG = 'errorLog';
 
     /**
-     * @var FileLogFactory
+     * @var LogFactory[]
      */
-    private $fileLogFactory;
-
-    /**
-     * @var CloudWatchLogFactory
-     */
-    private $cloudWatchLogFactory;
-
-    /**
-     * @var ErrorLogFactory
-     */
-    private $errorLogFactory;
-
-    /**
-     * @var SysLogFactory
-     */
-    private $sysLogFactory;
+    private $logFactoryMap;
 
     /**
      * @var array
@@ -39,21 +24,10 @@ class LoggerFactory
 
     /**
      * LoggerFactory constructor.
-     * @param FileLogFactory $fileLogFactory
-     * @param CloudWatchLogFactory $cloudWatchLogFactory
-     * @param ErrorLogFactory $errorLogFactory
-     * @param SysLogFactory $sysLogFactory
+     * @param array $logFactoryMap
      */
-    public function __construct(
-        FileLogFactory $fileLogFactory,
-        CloudWatchLogFactory $cloudWatchLogFactory,
-        ErrorLogFactory $errorLogFactory,
-        SysLogFactory $sysLogFactory
-    ) {
-        $this->fileLogFactory = $fileLogFactory;
-        $this->cloudWatchLogFactory = $cloudWatchLogFactory;
-        $this->sysLogFactory = $sysLogFactory;
-        $this->errorLogFactory = $errorLogFactory;
+    public function __construct(array $logFactoryMap) {
+        $this->logFactoryMap = $logFactoryMap;
     }
 
     /**
@@ -64,7 +38,7 @@ class LoggerFactory
      */
     public function create(string $type, string $channelName): LoggerInterface
     {
-        if (!isset($this->getLoggersMap()[$type])) {
+        if (!isset($this->logFactoryMap[$type])) {
             throw new InfrastructureException('A logger for the needed type( "' . $type . '" ) is not found');
         }
 
@@ -72,20 +46,6 @@ class LoggerFactory
             return $this->loggers[$type][$channelName];
         }
 
-        return $this->getLoggersMap()[$type]->create($channelName);
-
-    }
-
-    /**
-     * @return LogFactory[]
-     */
-    protected function getLoggersMap(): array
-    {
-        return [
-            self::FILE => $this->fileLogFactory,
-            self::CLOUD_WATCH => $this->cloudWatchLogFactory,
-            self::SYSLOG => $this->sysLogFactory,
-            self::ERROR_LOG => $this->errorLogFactory
-        ];
+        return $this->logFactoryMap[$type]->create($channelName);
     }
 }

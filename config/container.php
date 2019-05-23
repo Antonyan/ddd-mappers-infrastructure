@@ -22,15 +22,15 @@ $containerBuilder->register('HttpClient', \Infrastructure\Models\Http\HttpClient
 
 
 $containerBuilder->register('LoggerFactory', LoggerFactory::class)
-    ->addArgument(new FileLogFactory(LOG_PATH, new StreamProvider()))
-    ->addArgument(
-        new CloudWatchLogFactory(
+    ->addArgument([
+        LoggerFactory::FILE => new FileLogFactory(LOG_PATH, new StreamProvider()),
+        LoggerFactory::CLOUD_WATCH => new CloudWatchLogFactory(
             getenv('APPLICATION_NAME') ?: '',
             getenv('ENV')?: '',
             new CloudWatchProvider()
-        )
-    )
-    ->addArgument(new ErrorLogFactory(new ErrorLogProvider()))
-    ->addArgument(new SysLogFactory(new SysLogProvider(
-        (getenv('APPLICATION_NAME') ?: '') . '-'.(getenv('ENV')?: '')
-    )));
+        ),
+        LoggerFactory::SYSLOG => new ErrorLogFactory(new ErrorLogProvider()),
+        LoggerFactory::ERROR_LOG => new SysLogFactory(new SysLogProvider(
+            (getenv('APPLICATION_NAME') ?: '') . '-'.(getenv('ENV')?: '')
+        ))
+    ]);

@@ -21,10 +21,6 @@ abstract class LogService extends BaseService
             return new LoggerNullObject();
         }
 
-        if (!array_key_exists($this->config()->loggingType(), $this->loggersMap())){
-            throw new InfrastructureException('Unknown logging type ' . $this->config()->loggingType());
-        }
-
         return $this->getLoggerFactory()->create($this->config()->loggingType(), $this->getChannelName());
     }
 

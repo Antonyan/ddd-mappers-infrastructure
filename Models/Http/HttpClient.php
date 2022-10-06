@@ -57,6 +57,34 @@ class HttpClient
     }
 
     /**
+     * @param string $method
+     * @param string $uri
+     * @param array $options
+     * @return ResponseInterface
+     * @throws InfrastructureException
+     * @throws InternalException
+     */
+    public function request(string $method, string $uri = '', array $options = []): ResponseInterface
+    {
+        try {
+            return $this->responseFactory->createFromResponse($this->guzzleHttpClient->request($method, $uri, $options));
+        } catch (RequestException $exception) {
+            $response = $exception->getResponse();
+            throw new InternalException(
+                $exception->getMessage(),
+                HttpExceptionInterface::DEFAULT_ERROR_CODE,
+                (new ErrorData())->add('content', $response->getBody()->getContents()),
+                $response->getStatusCode(),
+                (new ErrorData())->addAll($this->getResponseHeadersFormatted($response->getHeaders())),
+                $exception,
+                $exception->getCode()
+            );
+        } catch (GuzzleException $exception) {
+            throw new InfrastructureException('Guzzle Exception', $exception);
+        }
+    }
+
+    /**
      * @param array $headers
      * @return array
      */

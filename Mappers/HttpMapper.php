@@ -197,6 +197,15 @@ abstract class HttpMapper extends BaseMapper
     }
 
     /**
+     * @throws InternalException
+     */
+    protected function requestForEntity(string $method, string $uri, array $options): ArraySerializable
+    {
+        $options['headers'] = $this->defaultHeaders->merge(new Headers($options['headers'] ?? []))->toArray();
+        return $this->buildObject($this->httpClient->request($method, $uri, $options)->getParsedBody());
+    }
+
+    /**
      * @param RequestInterface $request
      * @return Collection
      * @throws InternalException
